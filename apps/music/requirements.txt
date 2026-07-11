@@ -1,0 +1,7 @@
+# music-vault 项目依赖
+# 安装命令：pip install -r requirements.txt
+
+fastapi==0.138.0
+uvicorn==0.49.0
+mutagen==1.48.0
+python-multipart==0.0.20

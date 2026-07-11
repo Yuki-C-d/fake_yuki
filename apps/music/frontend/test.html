@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>test</title></head><body>
+<h1>Audio Test</h1>
+<audio id="a1" controls style="width:100%"></audio>
+<p id="log"></p>
+<script>
+const log = (msg) => { document.getElementById('log').innerHTML += msg + '<br>'; console.log(msg); };
+
+fetch('/api/songs').then(r => r.json()).then(songs => {
+    log(`Loaded ${songs.length} songs`);
+    const s = songs[0];
+    log(`Playing: ${s.title} (ID=${s.id}, format=${s.file_format})`);
+    log(`URL: /api/stream/${s.id}`);
+
+    const audio = document.getElementById('a1');
+    audio.src = `/api/stream/${s.id}`;
+
+    audio.addEventListener('loadedmetadata', () => log('✅ loadedmetadata'));
+    audio.addEventListener('canplay', () => log('✅ canplay'));
+    audio.addEventListener('play', () => log('✅ play'));
+    audio.addEventListener('error', (e) => {
+        const err = audio.error;
+        log(`❌ Error code=${err.code} message="${err.message}"`);
+        // MEDIA_ERR_ABORTED=1, MEDIA_ERR_NETWORK=2, MEDIA_ERR_DECODE=3, MEDIA_ERR_SRC_NOT_SUPPORTED=4
+    });
+    audio.addEventListener('stalled', () => log('⚠️ stalled'));
+    audio.addEventListener('waiting', () => log('⏳ waiting'));
+
+    audio.play().then(() => log('✅ play() resolved')).catch(e => log(`❌ play() rejected: ${e.message}`));
+});
+</script>
+</body></html>

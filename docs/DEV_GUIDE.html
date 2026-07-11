@@ -1,0 +1,673 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>music-vault 开发指南</title>
+<style>
+  /* ============================================
+     整体样式 - 你可以随便改颜色、字体
+  ============================================ */
+  :root {
+    --bg: #f8f9fa;
+    --sidebar-bg: #1a1a2e;
+    --sidebar-text: #ccc;
+    --card-bg: #ffffff;
+    --text: #333;
+    --code-bg: #2d2d2d;
+    --code-text: #f8f8f2;
+    --accent: #6c63ff;
+    --accent2: #ff6b6b;
+    --border: #e0e0e0;
+    --green: #2ed573;
+    --yellow: #ffa502;
+    --sidebar-width: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ============================================
+     侧边栏导航
+  ============================================ */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 24px 0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar .logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar .logo span { color: var(--accent2); }
+  .sidebar a {
+    display: block;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    padding: 6px 20px;
+    font-size: 14px;
+    transition: 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar a:hover, .sidebar a.active {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+    border-left-color: var(--accent);
+  }
+  .sidebar .section-title {
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 16px 20px 6px;
+  }
+
+  /* ============================================
+     主内容区
+  ============================================ */
+  .main {
+    margin-left: var(--sidebar-width);
+    padding: 32px 40px;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  h1 { font-size: 28px; margin-bottom: 8px; color: #1a1a2e; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
+
+  .section {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+  .section h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section h3 {
+    font-size: 15px;
+    margin: 16px 0 8px;
+  }
+
+  /* 表格 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+  }
+  th {
+    background: #f1f2f6;
+    font-weight: 600;
+  }
+
+  /* 代码块 */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 12px 0;
+  }
+  code {
+    background: #ffeaa7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Consolas", monospace;
+    font-size: 13px;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+  }
+
+  /* 状态标签 */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-ok  { background: #d4edda; color: #155724; }
+  .badge-wip { background: #fff3cd; color: #856404; }
+
+  /* 提示框 */
+  .tip {
+    background: #fff8e1;
+    border-left: 4px solid var(--yellow);
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+  }
+  .warn {
+    background: #ffeaea;
+    border-left: 4px solid var(--accent2);
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+  }
+
+  /* 响应式 - 手机端 */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 16px; }
+  }
+
+  /* 打印时隐藏侧边栏 */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { break-inside: avoid; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     侧边栏 - 改导航内容只需改下面 <a> 标签
+============================================ -->
+<nav class="sidebar">
+  <div class="logo">🎵 music<span>-vault</span></div>
+  <div class="section-title">快速导航</div>
+  <a href="#overview">📂 项目总览</a>
+  <a href="#env">🐍 Python 环境</a>
+  <a href="#files">📝 文件说明</a>
+  <a href="#ncmdump">🔧 ncmdump 解密</a>
+  <a href="#transcode">🎛️ AV3A 转码</a>
+	  <a href="#frp">☁️ 外网访问 (frp)</a>
+	  <a href="#database">🗄️ 数据库结构</a>
+  <a href="#commands">🚀 操作速查表</a>
+  <a href="#faq">⚠️ 常见问题</a>
+  <a href="#progress">📅 开发进度</a>
+</nav>
+
+<!-- ============================================
+     主内容区 - 要改内容从这里开始改
+============================================ -->
+<main class="main">
+
+  <h1>🎵 music-vault 开发指南</h1>
+  <p class="subtitle">写给此方自己的操作手册 · 最后更新 2026-07-10</p>
+
+  <!-- ============ 项目总览 ============ -->
+  <div class="section" id="overview">
+    <h2>📂 项目总览</h2>
+    <pre><code>D:\music-vault\                    ← 项目根目录
+│
+├── apps\                           ← 🚀 应用模块
+│   ├── music\                      ← 🎵 音乐播放器
+│   │   ├── backend\                ← Python 后端 (FastAPI + SQLite)
+│   │   │   ├── main.py               ← ⭐ 16 个 API 路由
+│   │   │   ├── models.py             ← 数据库 (3 张表)
+│   │   │   ├── scanner.py            ← 文件扫描器
+│   │   │   └── config.py             ← 路径配置
+│   │   ├── frontend\               ← HTML 播放器
+│   │   │   ├── index.html            ← 主页
+│   │   │   └── test.html             ← 测试页
+│   │   ├── data\                   ← SQLite 数据库
+│   │   └── requirements.txt          ← Python 依赖
+│   └── nav\                        ← 🔗 导航站 (fake-star.xyz)
+│       ├── index.html
+│       └── CNAME
+│
+├── server\                         ← ☁️ 服务器配置
+│   ├── frpc\                       ← frpc 客户端
+│   ├── keys\                       ← SSH 密钥
+│   ├── server.env                    ← 服务器凭证
+│   └── start-frpc.bat                ← frpc 开机启动
+│
+├── music-files\                    ← 🎵 音乐文件
+│   ├── m4a\                        ← ✅ AAC/M4A (浏览器可播)
+│   └── originals\                  ← 📦 原始备份
+│
+├── tools\                          ← 🔧 工具集
+│   ├── convert_to_m4a.sh             ← AV3A→M4A 转码脚本
+│   ├── av3a_decoder\               ← AV3A 解码器
+│   ├── extract_av3a.py               ← MP4→AV3A 提取
+│   └── ncmdump.exe                   ← NCM 解密
+│
+├── docs\                           ← 📄 文档
+│   ├── README.md                     ← 项目方案
+│   ├── PROGRESS.md                   ← 开发进度
+│   ├── DEV_GUIDE.html                ← 操作手册
+│   └── SERVER.md                     ← 服务器文档
+│
+└── .gitignore</code></pre>
+
+    <h3>🏗️ 多端架构</h3>
+    <pre><code>                    ┌─ 个人网站（作品展示 + 外网听歌）
+FastAPI 后端 ───────┼─ 浏览器网页（MVP &#9857; 先做这个）
+  (一直跑着)        └─ Electron 桌面软件（后期主力客户端）
+
+一套后端 API，N 种前端。网页版放个人网站当活作品集。</code></pre>
+  </div>
+
+  <!-- ============ Python 环境 ============ -->
+  <div class="section" id="env">
+    <h2>🐍 Python 环境</h2>
+
+    <h3>检查 Python</h3>
+    <pre><code>python --version
+# 应该输出：Python 3.13.x</code></pre>
+
+    <h3>查看已安装的依赖</h3>
+    <pre><code>pip list | Select-String "fastapi|uvicorn|mutagen"</code></pre>
+
+    <table>
+      <tr><th>库名</th><th>版本</th><th>作用</th></tr>
+      <tr><td>fastapi</td><td>0.138</td><td>Web 框架，写 API 接口</td></tr>
+      <tr><td>uvicorn</td><td>0.49</td><td>运行 FastAPI 服务器</td></tr>
+      <tr><td>mutagen</td><td>1.48</td><td>读取 FLAC/MP3 文件的标签</td></tr>
+    </table>
+
+    <h3>安装新依赖</h3>
+    <pre><code>pip install 包名</code></pre>
+    <div class="tip">⚠️ pip install 不需要在特定目录下跑，全局有效</div>
+  </div>
+
+  <!-- ============ 文件说明 ============ -->
+  <div class="section" id="files">
+    <h2>📝 每个文件说明</h2>
+
+    <h3>app/__init__.py</h3>
+    <ul>
+      <li>空文件，不用写代码</li>
+      <li>作用：让 Python 把 app 当成"包"，其他文件才能 <code>from app.xxx import yyy</code></li>
+      <li>❌ 别删！</li>
+    </ul>
+
+    <h3>apps/music/backend/config.py — 路径配置</h3>
+    <ul>
+      <li>存放项目里所有路径常量</li>
+      <li>以后引路径都从这里拿，改一处全局生效</li>
+    </ul>
+    <pre><code>import os
+
+# 项目根目录（D:\music-vault）
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# 音乐文件夹
+MUSIC_DIR = os.path.join(BASE_DIR, "music")
+
+# 数据库文件路径
+DB_PATH = os.path.join(BASE_DIR, "data", "music.db")</code></pre>
+
+    <h3>apps/music/backend/models.py — 数据库 ✅</h3>
+    <ul>
+      <li><strong>3 张表：</strong>songs（歌曲）、playlists（歌单）、playlist_songs（歌单-歌曲关联）</li>
+      <li>外键级联：删除歌单自动清理关联，删除歌曲自动清理关联</li>
+      <li><code>PRAGMA foreign_keys = ON</code> 确保外键生效（SQLite 默认关闭）</li>
+      <li>使用 Python 内置 <code>sqlite3</code>，INSERT OR IGNORE 防重复</li>
+    </ul>
+
+    <h3>apps/music/backend/scanner.py — 扫描器 ✅</h3>
+    <ul>
+      <li>遍历 music 文件夹 → 自动检测 FLAC/MP4 → 用 mutagen 读标签 → 写入数据库</li>
+      <li><code>get_tag()</code> 跨格式读标签（FLAC 用 title/artist，MP4 用 ©nam/©ART）</li>
+      <li>运行：<code>python -c "from apps.music.backend.scanner import scan; scan()"</code></li>
+    </ul>
+
+    <h3>apps/music/backend/main.py ⭐ API 服务器入口</h3>
+    <ul>
+      <li>FastAPI 启动入口，含 <strong>16 个路由</strong></li>
+      <li>启动：<code>cd D:\music-vault && python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080</code></li>
+      <li>启动后自动 init_db() + scan()，无需手动跑 python 命令</li>
+      <li><strong>安全加固（2026-07-04）：</strong>
+        <ul>
+          <li>路径穿越防护 — <code>safe_file_path()</code> 防止通过 <code>../</code> 读取系统文件</li>
+          <li>数据库连接用 <code>closing()</code> 包裹，确保每次请求后释放连接</li>
+        </ul>
+      </li>
+      <li><strong>Phase 3 新增（2026-07-07）：</strong>
+        <ul>
+          <li><strong>歌单管理</strong> — 创建/重命名/删除歌单，右键歌曲添加/移除，歌曲排序</li>
+          <li>左侧边栏布局 — 点击切换歌单，小屏自适应</li>
+          <li>首页禁用缓存 — Cache-Control: no-cache</li>
+        </ul>
+      </li>
+      <li>API 列表：
+        <table>
+          <tr><th>方法</th><th>路径</th><th>说明</th></tr>
+          <tr><td>GET</td><td><code>/</code></td><td>返回前端播放器页面</td></tr>
+          <tr><td>GET</td><td><code>/api/songs</code></td><td>返回全部歌单（JSON）</td></tr>
+          <tr><td>GET</td><td><code>/api/songs/{id}</code></td><td>单曲详情（含 file_size、added_at）</td></tr>
+          <tr><td>GET</td><td><code>/api/stream/{id}</code></td><td>音频流播放（Range 支持 + 动态 MIME）</td></tr>
+          <tr><td>POST</td><td><code>/api/upload</code></td><td>上传音频文件（拖拽/点击，支持 .ncm）</td></tr>
+          <tr><td>GET</td><td><code>/api/conversions</code></td><td>查看 AV3A 转码队列和进度</td></tr>
+          <tr><td>POST</td><td><code>/api/scan</code></td><td>手动触发扫描，返回入库数量</td></tr>
+        </table>
+        <br>
+        <strong>🆕 歌单 API：</strong>
+        <table>
+          <tr><th>方法</th><th>路径</th><th>说明</th></tr>
+          <tr><td>GET</td><td><code>/api/playlists</code></td><td>列出所有歌单</td></tr>
+          <tr><td>POST</td><td><code>/api/playlists</code></td><td>创建歌单</td></tr>
+          <tr><td>PUT</td><td><code>/api/playlists/{id}</code></td><td>重命名歌单</td></tr>
+          <tr><td>DELETE</td><td><code>/api/playlists/{id}</code></td><td>删除歌单</td></tr>
+          <tr><td>GET</td><td><code>/api/playlists/{id}/songs</code></td><td>歌单内歌曲</td></tr>
+          <tr><td>POST</td><td><code>/api/playlists/{id}/songs</code></td><td>添加歌曲到歌单</td></tr>
+          <tr><td>DELETE</td><td><code>/api/playlists/{id}/songs/{sid}</code></td><td>从歌单移除歌曲</td></tr>
+          <tr><td>PUT</td><td><code>/api/playlists/{id}/songs/reorder</code></td><td>重新排序</td></tr>
+        </table>
+      </li>
+      <li>浏览器打开 <code>http://127.0.0.1:8080</code> 直接看播放器</li>
+      <li>浏览器打开 <code>http://127.0.0.1:8080/docs</code> 看自动生成的 API 文档</li>
+    </ul>
+  </div>
+
+  <!-- ============ ncmdump ============ -->
+  <div class="section" id="ncmdump">
+    <h2>🔧 ncmdump 解密工具</h2>
+
+    <h3>位置</h3>
+    <pre><code>D:\music-vault\ncmdump\ncmdump.exe</code></pre>
+
+    <h3>解密单个文件</h3>
+    <pre><code>cd D:\music-vault
+.\ncmdump\ncmdump.exe "music\歌曲名.ncm" -o music</code></pre>
+
+    <h3>批量解密整个文件夹</h3>
+    <pre><code>cd D:\music-vault
+.\ncmdump\ncmdump.exe -d music -o music</code></pre>
+
+    <div class="tip">💡 现在不用手动运行 ncmdump 了！直接在网页上拖 .ncm 文件，后端自动解密+入库。</div>
+  </div>
+
+  <!-- ============ 网页上传 ============ -->
+  <div class="section" id="upload">
+    <h2>📤 网页上传歌曲（推荐）</h2>
+
+    <div class="tip">💡 最简单的方式：打开网页 <code>http://127.0.0.1:8080</code>，拖拽音频文件到虚线框即可。</div>
+
+    <h3>支持的上传格式</h3>
+    <table>
+      <tr><th>格式</th><th>处理方式</th><th>结果</th></tr>
+      <tr><td>.m4a .mp3 .ogg .wav .aac</td><td>直接入库</td><td>✅ 立即可播</td></tr>
+      <tr><td>.ncm</td><td>ncmdump 自动解密 → 检测格式</td><td>✅ 或 🔧（看下方）</td></tr>
+      <tr><td>.flac（真）</td><td>直接入库（头4字节=fLaC）</td><td>✅ 可播</td></tr>
+      <tr><td>.flac（AV3A伪装）</td><td>自动后台转码（头4字节≠fLaC）</td><td>🔧 30-50分钟后可播</td></tr>
+    </table>
+
+    <h3>上传流程</h3>
+    <pre><code>拖文件到网页 → 上传 → 解密(如.ncm) → 格式检测
+  ├─ 真音频 → 直接入库 → 歌单出现 → ✅
+  └─ AV3A   → 后台自动转码 → 转码队列显示进度
+               → 完成后自动入库 → 歌单出现 → ✅</code></pre>
+
+    <h3>转码进度</h3>
+    <p>网页下方有「🔄 转码中」区域，每 30 秒自动刷新：</p>
+    <table>
+      <tr><th>状态</th><th>含义</th></tr>
+      <tr><td>⏳ 排队中</td><td>等待处理（同时最多 N 首并行）</td></tr>
+      <tr><td>🔓 解码中…</td><td>av3a_decoder 解码中（最慢，30-50分钟）</td></tr>
+      <tr><td>🎚️ 即将完成</td><td>ffmpeg 编码中（~30秒）</td></tr>
+      <tr><td>✅ 已完成</td><td>自动入库，刷新后出现在歌单</td></tr>
+    </table>
+  </div>
+
+  <!-- ============ AV3A 转码 ============ -->
+  <div class="section" id="transcode">
+    <h2>🎛️ AV3A/MP4 → AAC/M4A 转码</h2>
+
+    <div class="warn">⚠️ 某些音乐平台下载的文件是 MP4 容器 + AV3A (Audio Vivid/菁彩声) 编码，浏览器无法解码。需转码为 AAC/M4A 才能播放。</div>
+
+    <h3>前置条件</h3>
+    <pre><code># 确认有 av3a_decoder.exe（下载地址见下）
+ls tools/av3a_decoder/av3a_decoder.exe
+
+# 确认有 ffmpeg
+ffmpeg -version</code></pre>
+
+    <h3>一键转码（支持并行）</h3>
+    <pre><code>cd D:\music-vault
+bash convert_to_m4a.sh
+# 默认并行数=CPU核心数，可覆盖：
+# MAX_JOBS=2 bash convert_to_m4a.sh</code></pre>
+    <div class="tip">💡 现在上传 AV3A 后会自动后台转码，通常不需要手动运行此脚本。脚本依然可用，适合批量处理。</div>
+
+    <h3>流水线（每首歌自动完成）</h3>
+    <table>
+      <tr><th>步骤</th><th>工具</th><th>说明</th><th>耗时</th></tr>
+      <tr><td>1. 提取</td><td>Python (内联)</td><td>MP4 mdat box → raw AV3A 流</td><td>秒级</td></tr>
+      <tr><td>2. 解码</td><td>av3a_decoder.exe</td><td>AV3A 12ch → WAV</td><td>30-50 分钟/首</td></tr>
+      <tr><td>3. 编码</td><td>ffmpeg</td><td>WAV → AAC 256k 立体声 M4A + 元数据</td><td>5-10 秒</td></tr>
+    </table>
+
+    <h3>获取解码器</h3>
+    <p>蓝奏云下载 <code>av3a_decoder_v0.2.zip</code>，解压到 <code>tools/av3a_decoder/</code>：</p>
+    <pre><code>地址: https://wwp.lanzn.com/b05f4b0xe
+密码: 6jj4
+
+# 或用 Python 自动下载（需要 lanzou-api）
+pip install lanzou-api
+python -c "...见 convert_to_m4a.sh 头部注释..."</code></pre>
+
+    <div class="tip">💡 转码后原文件会移到 <code>music/originals/</code>，不删除。已存在文件自动跳过，可安全重复运行。</div>
+  </div>
+  <!-- ============ frp 外网访问 ============ -->
+  <div class="section" id="frp">
+    <h2>☁️ 外网访问 (frp 内网穿透)</h2>
+
+    <h3>公网地址</h3>
+    <table>
+      <tr><th>地址</th><th>用途</th></tr>
+      <tr><td><code>http://8.166.119.185:8080</code></td><td>🎵 音乐站（外网直接访问）</td></tr>
+      <tr><td><code>http://8.166.119.185:7500</code></td><td>📊 frp 管理面板</td></tr>
+      <tr><td><code>ssh root@8.166.119.185</code></td><td>🔧 服务器管理</td></tr>
+    </table>
+
+    <h3>架构</h3>
+    <pre><code>外网手机/电脑
+    │
+    ▼
+8.166.119.185:8080  ← 阿里云 ECS（广州，2核2G，3Mbps）
+    │
+    ▼ frps (systemd 开机自启)
+    │
+    ▼ frpc (你电脑，开机自启)
+    │
+    ▼
+localhost:8080 (FastAPI)</code></pre>
+
+    <h3>服务器信息</h3>
+    <table>
+      <tr><th>项目</th><th>详情</th></tr>
+      <tr><td>厂商</td><td>阿里云 ECS 经济型 e 实例</td></tr>
+      <tr><td>配置</td><td>2核2G / 40G / 3Mbps 固定带宽</td></tr>
+      <tr><td>系统</td><td>Ubuntu 22.04 LTS</td></tr>
+      <tr><td>地域</td><td>华南 广州</td></tr>
+      <tr><td>价格</td><td>99元/年，续费同价至 2030 年</td></tr>
+      <tr><td>登录</td><td>SSH 密钥 <code>.server/id_ed25519</code></td></tr>
+    </table>
+
+    <h3>相关文件</h3>
+    <table>
+      <tr><th>文件</th><th>用途</th></tr>
+      <tr><td><code>.server.env</code></td><td>ECS IP + frp 凭证（已加入 .gitignore）</td></tr>
+      <tr><td><code>.server/id_ed25519</code></td><td>SSH 私钥（密钥认证）</td></tr>
+      <tr><td><code>.server/frpc_local/frpc.toml</code></td><td>frpc 配置文件</td></tr>
+      <tr><td><code>.server/start-frpc.bat</code></td><td>frpc 开机启动脚本</td></tr>
+    </table>
+
+    <div class="warn">⚠️ frpc.exe 可能被 Windows Defender 误杀。已将 <code>D:\music-vault</code> 加入杀毒排除。勿删这个排除项。</div>
+  </div>
+
+  <!-- ============ 数据库结构 ============ -->
+  <div class="section" id="database">
+    <h2>🗄️ 数据库结构</h2>
+
+    <h3>songs — 歌曲表</h3>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th><th>示例</th></tr>
+      <tr><td>id</td><td>INTEGER</td><td>自增主键</td><td>1</td></tr>
+      <tr><td>title</td><td>TEXT</td><td>歌曲标题</td><td>The Pilot 3</td></tr>
+      <tr><td>artist</td><td>TEXT</td><td>艺人</td><td>ONE OK ROCK</td></tr>
+      <tr><td>album</td><td>TEXT</td><td>专辑名</td><td>DETOX</td></tr>
+      <tr><td>duration</td><td>REAL</td><td>时长（秒）</td><td>245.3</td></tr>
+      <tr><td>file_path</td><td>TEXT</td><td>文件相对路径</td><td>music\...flac</td></tr>
+      <tr><td>file_format</td><td>TEXT</td><td>格式</td><td>flac</td></tr>
+      <tr><td>file_size</td><td>INTEGER</td><td>文件大小（字节）</td><td>48331026</td></tr>
+      <tr><td>added_at</td><td>TEXT</td><td>入库时间</td><td>2026-07-01 00:15</td></tr>
+    </table>
+
+    <h3>🆕 playlists — 歌单表</h3>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>INTEGER</td><td>自增主键</td></tr>
+      <tr><td>name</td><td>TEXT</td><td>歌单名称</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>描述（可选）</td></tr>
+      <tr><td>created_at</td><td>TEXT</td><td>创建时间</td></tr>
+    </table>
+
+    <h3>🆕 playlist_songs — 歌单-歌曲关联表</h3>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>INTEGER</td><td>自增主键</td></tr>
+      <tr><td>playlist_id</td><td>INTEGER</td><td>歌单 ID（外键→playlists，级联删除）</td></tr>
+      <tr><td>song_id</td><td>INTEGER</td><td>歌曲 ID（外键→songs，级联删除）</td></tr>
+      <tr><td>position</td><td>INTEGER</td><td>排序位置</td></tr>
+      <tr><td>added_at</td><td>TEXT</td><td>添加时间</td></tr>
+    </table>
+    <div class="tip">💡 删除歌单不删歌曲（只清理关联表），删除歌曲则自动清理所有关联。</div>
+  </div>
+
+  <!-- ============ 操作速查表 ============ -->
+  <div class="section" id="commands">
+    <h2>🚀 操作速查表</h2>
+
+    <h3>日常开发流程（按顺序跑）</h3>
+    <table>
+      <tr><th>#</th><th>做什么</th><th>命令</th><th>在哪跑</th></tr>
+      <tr><td>1</td><td>切到项目</td><td><code>cd D:\music-vault</code></td><td>终端</td></tr>
+      <tr><td>2</td><td>启动服务器</td><td><code>python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080</code></td><td>项目目录</td></tr>
+      <tr><td>3</td><td>打开网页</td><td><code>http://127.0.0.1:8080</code></td><td>浏览器（外部）</td></tr>
+      <tr><td>4</td><td>加歌</td><td>网页上拖拽文件上传</td><td>浏览器</td></tr>
+      <tr><td>5</td><td>API 文档</td><td><code>http://127.0.0.1:8080/docs</code></td><td>浏览器</td></tr>
+    </table>
+
+    <h3>AV3A 转码</h3>
+    <table>
+      <tr><th>做什么</th><th>命令</th></tr>
+      <tr><td>批量转码（AV3A→M4A）</td><td><code>bash convert_to_m4a.sh</code></td></tr>
+    </table>
+
+    <h3>手动命令（无需启动服务器）</h3>
+    <table>
+      <tr><th>做什么</th><th>命令</th></tr>
+      <tr><td>初始化数据库</td><td><code>python -c "from apps.music.backend.models import init_db; init_db()"</code></td></tr>
+      <tr><td>扫描入库</td><td><code>python -c "from apps.music.backend.scanner import scan; scan()"</code></td></tr>
+      <tr><td>查看曲库</td><td><code>python -c "from apps.music.backend.models import get_connection; c=get_connection(); [print(r) for r in c.execute('SELECT id,title,artist FROM songs')]"</code></td></tr>
+    </table>
+
+        <h3>外网访问 (frp)</h3>
+    <table>
+      <tr><th>做什么</th><th>命令</th><th>在哪跑</th></tr>
+      <tr><td>启动 frpc</td><td><code>.server\frpc_local\frpc.exe -c .server\frpc_local\frpc.toml</code></td><td>本地</td></tr>
+      <tr><td>查看 frps 状态</td><td><code>systemctl status frps</code></td><td>服务器</td></tr>
+      <tr><td>重启 frps</td><td><code>systemctl restart frps</code></td><td>服务器</td></tr>
+      <tr><td>查看隧道</td><td>浏览器打开 <code>http://8.166.119.185:7500</code></td><td>任意</td></tr>
+      <tr><td>frps 日志</td><td><code>tail -f /var/log/frps.log</code></td><td>服务器</td></tr>
+    </table>
+
+    <h3>常用 pip 命令</h3>
+    <table>
+      <tr><th>命令</th><th>作用</th></tr>
+      <tr><td><code>pip install 包名</code></td><td>安装新库</td></tr>
+      <tr><td><code>pip list</code></td><td>查看已安装的所有库</td></tr>
+      <tr><td><code>pip install 包名 --upgrade</code></td><td>升级某个库</td></tr>
+    </table>
+  </div>
+
+  <!-- ============ 常见问题 ============ -->
+  <div class="section" id="faq">
+    <h2>⚠️ 常见问题</h2>
+
+    <h3>Q: 浏览器点播放没声音</h3>
+    <p><strong>原因：</strong>文件可能是 AV3A（菁彩声/AVS3-P3）编码，不是标准音频格式。浏览器不支持 AV3A 解码。</p>
+    <p><strong>✅ 已解决：</strong>使用 <code>convert_to_m4a.sh</code> 一键转码为 AAC/M4A 即可。见上方「🎛️ AV3A 转码」章节。</p>
+
+    <h3>Q: 新歌不显示在网页上</h3>
+    <p><strong>解决：</strong>把文件放到 <code>music/</code> 目录下，然后触发扫描：</p>
+    <pre><code>curl -X POST http://127.0.0.1:8080/api/scan</code></pre>
+    <p>或者重启服务器（启动时自动扫描）。</p>
+
+    <h3>Q: 播放器显示"格式不支持"</h3>
+    <p><strong>原因1：</strong>VS Code 内置浏览器不支持 M4A 解码。用外部浏览器（Chrome/Edge）打开。</p>
+    <p><strong>原因2：</strong>文件是 AV3A 编码。系统会自动检测→后台转码→完成后可播。查看页面下方转码进度。</p>
+
+    <h3>Q: scanner 报 "not a valid FLAC file"</h3>
+    <p><strong>原因：</strong>文件扩展名是 .flac 但实际是 MP4/AV3A 容器。scanner 已加入 AV3A 检测，伪 FLAC 自动跳过不入库。</p>
+  </div>
+
+  <!-- ============ 开发进度 ============ -->
+  <div class="section" id="progress">
+    <h2>📅 开发进度</h2>
+    <table>
+      <tr><th>阶段</th><th>内容</th><th>状态</th></tr>
+      <tr><td>环境</td><td>Python + pip + 依赖库</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>工具</td><td>ncmdump 解密工具</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>测试数据</td><td>3 首 FLAC 测试曲</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>项目结构</td><td>目录 + 空文件 + .gitignore</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>config.py</td><td>路径配置</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>models.py</td><td>数据库建表</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>scanner.py</td><td>扫描入库（带日志）</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>main.py</td><td>API 服务器（6 路由 + 安全加固）</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>前端</td><td>网页播放器（错误提示）</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>安全</td><td>路径穿越防护 + 连接管理</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>AV3A解码</td><td>av3a_decoder 下载 + 反爬绕过</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>转码脚本</td><td>convert_to_m4a.sh（3步流水线）</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>M4A支持</td><td>config 加 .m4a + 数据库清理</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>浏览器播放</td><td>3首 M4A 全部可播</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>Phase 2</td><td>切歌/搜索/UI/Range/并行转码</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>网页上传</td><td>拖拽上传 + NCM解密 + 自动转码</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>转码进度</td><td>可视化进度追踪 + 自动入库</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>歌单管理</td><td>创建/重命名/删除歌单 + 右键添加移除 + 排序</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>外网访问</td><td>阿里云 ECS + frp 内网穿透（2026-07-10）</td><td><span class="badge badge-ok">✅ 完成</span></td></tr>
+      <tr><td>Agent 接入</td><td>设计方案已就绪（待功能稳定后实施）</td><td><span class="badge badge-wip">📋 已规划</span></td></tr>
+    </table>
+  </div>
+
+  <p style="text-align:center; color:#aaa; margin-top:40px; padding:20px;">
+    有问题翻不到答案？看 PROGRESS.md 或问 Yuki 😏❄️
+  </p>
+
+</main>
+</body>
+</html>

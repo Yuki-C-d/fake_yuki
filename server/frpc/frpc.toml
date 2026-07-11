@@ -1,0 +1,19 @@
+serverAddr = "8.166.119.185"
+serverPort = 7000
+
+auth.token = "mv-frp-token-2026-07-10"
+auth.method = "token"
+
+[[proxies]]
+name = "music-vault"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 8080
+remotePort = 8080
+
+[[proxies]]
+name = "gw-ws"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 18789
+remotePort = 18790

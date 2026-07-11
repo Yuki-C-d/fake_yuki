@@ -1,0 +1,8 @@
+1. Extract av3a
+es_extractor.exe sample.ts sample.av3a 0x101
+
+2. Decode
+av3a_decoder.exe sample.av3a sample.wav
+
+3. Convert to anything
+ffmpeg -i sample.wav -filter "channelmap=0|1|2|3|4|5:FL+FR+FC+LFE+SL+SR" -b:a 448k sample_layout.ac3
