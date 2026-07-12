@@ -39,7 +39,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="music-vault", lifespan=lifespan)
+app = FastAPI(title="fake_yuki", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

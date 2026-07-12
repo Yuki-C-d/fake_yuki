@@ -1,4 +1,4 @@
-# music-vault 项目依赖
+# fake_yuki 项目依赖
 # 安装命令：pip install -r requirements.txt
 
 fastapi==0.138.0

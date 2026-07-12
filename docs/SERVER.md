@@ -1,4 +1,4 @@
-# ☁️ music-vault 服务器文档
+# ☁️ fake_yuki 服务器文档
 
 > 最后更新: 2026-07-11
 
@@ -26,13 +26,13 @@
 
 ```bash
 # 私钥位置（本地）
-ssh -i D:\music-vault\.server\id_ed25519 root@8.166.119.185
+ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 ```
 
 | 文件 | 说明 |
 |------|------|
-| `.server/id_ed25519` | SSH 私钥（勿泄露） |
-| `.server/id_ed25519.pub` | SSH 公钥 |
+| `server/keys/id_ed25519` | SSH 私钥（勿泄露） |
+| `server/keys/id_ed25519.pub` | SSH 公钥 |
 
 > ⚠️ 密码认证已废弃。密钥通过阿里云控制台绑定到 ECS 实例。若重装系统需重新绑定。
 
@@ -47,7 +47,7 @@ ssh -i D:\music-vault\.server\id_ed25519 root@8.166.119.185
 | 22 | TCP | SSH | 服务器管理 |
 | 7000 | TCP | frp 控制端口 | frpc ↔ frps 通信 |
 | 7500 | TCP | frp 管理面板 | 浏览器查看隧道状态 |
-| 8080 | TCP | 音乐站 | 外网访问 music-vault |
+| 8080 | TCP | 音乐站 | 外网访问 fake_yuki |
 | 18790 | TCP | OpenClaw WebSocket | ECS node ↔ 本地 Gateway |
 
 ---
@@ -119,8 +119,8 @@ localhost:8080 (FastAPI 音乐站)
 
 ### frpc 配置（本地）
 
-- 配置文件: `D:\music-vault\.server\frpc_local\frpc.toml`
-- 开机自启: `D:\music-vault\.server\start-frpc.bat` → 启动文件夹
+- 配置文件: `D:\fake_yuki\server\frpc\frpc.toml`
+- 开机自启: `D:\fake_yuki\server\start-frpc.bat` → 启动文件夹
 
 ### 隧道列表
 
@@ -137,7 +137,7 @@ localhost:8080 (FastAPI 音乐站)
 | 重启 frps | `systemctl restart frps` | 服务器 |
 | 查看隧道 | 浏览器打开 `http://8.166.119.185:7500` | 任意 |
 | frps 日志 | `tail -f /var/log/frps.log` | 服务器 |
-| 启动 frpc | `D:\music-vault\.server\frpc_local\frpc.exe -c D:\music-vault\.server\frpc_local\frpc.toml` | 本地 |
+| 启动 frpc | `D:\fake_yuki\server\frpc\frpc.exe -c D:\fake_yuki\server\frpc\frpc.toml` | 本地 |
 | 杀 frpc | `taskkill /f /im frpc.exe` | 本地 |
 
 ---
@@ -171,20 +171,20 @@ rm /tmp/node.tar.xz
 
 ## 8. 本地相关文件
 
-所有服务器相关文件位于 `D:\music-vault\.server\`（已加入 `.gitignore`）：
+所有服务器相关文件位于 `D:\fake_yuki\server\`（已加入 `.gitignore`）：
 
 | 文件 | 用途 |
 |------|------|
-| `.server.env` | ECS IP + frp 凭证汇总 |
-| `id_ed25519` | SSH 私钥 |
-| `id_ed25519.pub` | SSH 公钥 |
-| `frpc_local/frpc.toml` | frpc 配置 |
-| `frpc_local/frpc.exe` | frpc 可执行文件 |
+| `server.env` | ECS IP + frp 凭证汇总 |
+| `keys/id_ed25519` | SSH 私钥 |
+| `keys/id_ed25519.pub` | SSH 公钥 |
+| `frpc/frpc.toml` | frpc 配置 |
+| `frpc/frpc.exe` | frpc 可执行文件 |
 | `start-frpc.bat` | frpc 开机启动脚本 |
 
 ### Windows Defender 排除
 
-已排除 `D:\music-vault` 整个文件夹，防止 Defender 误杀 `frpc.exe`。
+已排除 `D:\fake_yuki` 整个文件夹，防止 Defender 误杀 `frpc.exe`。
 
 ---
 
@@ -211,4 +211,4 @@ rm /tmp/node.tar.xz
 
 ---
 
-*本文档涵盖截至 2026-07-11 的所有服务器配置。OpenClaw node 部署问题详见 PROGRESS.md。*
+*本文档涵盖截至 2026-07-11 的所有服务器配置。OpenClaw node 部署问题详见 `docs/archive/PROGRESS.md`。*
