@@ -37,3 +37,4 @@ server/server.env
 server/keys/
 # 静态资源大图（部署时再传）
 apps/home/wallpaper.jpg
+apps/music/frontend/wallpaper.jpg
