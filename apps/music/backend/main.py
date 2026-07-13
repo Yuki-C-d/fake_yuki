@@ -9,6 +9,7 @@ import subprocess
 from apps.music.backend import config
 from apps.music.backend import models
 from apps.music.backend import scanner
+from apps.music.backend.ncm_client import NCMClient
 
 # MIME 类型映射
 MIME_MAP = {
@@ -36,7 +37,18 @@ def safe_file_path(rel_path: str) -> str:
 async def lifespan(_app: FastAPI):
     models.init_db()
     scanner.scan()
+    global ncm_client
+    ncm_client = NCMClient()
     yield
+    await ncm_client.close()
+
+
+ncm_client: NCMClient | None = None
+
+
+def get_ncm() -> NCMClient:
+    assert ncm_client is not None, "NCM client not initialized"
+    return ncm_client
 
 
 app = FastAPI(title="fake_yuki", lifespan=lifespan)
@@ -494,3 +506,77 @@ def reorder_playlist_songs(playlist_id: int, body: PlaylistReorder):
         models.reorder_playlist_songs(cursor, playlist_id, body.song_ids)
         conn.commit()
     return {"status": "ok"}
+
+
+# ═══════════════════════════════════════
+#  网易云音乐 API 代理
+# ═══════════════════════════════════════
+
+
+@app.get("/api/ncm/status")
+async def ncm_login_status():
+    return await get_ncm().get_login_status()
+
+
+@app.get("/api/ncm/qr/key")
+async def ncm_qr_key():
+    data = await get_ncm().get_qr_key()
+    return {"unikey": data.get("data", {}).get("unikey", "")}
+
+
+@app.get("/api/ncm/qr/create")
+async def ncm_qr_create(key: str):
+    data = await get_ncm().create_qr_code(key)
+    return {
+        "qrurl": data.get("data", {}).get("qrurl", ""),
+        "qrimg": data.get("data", {}).get("qrimg", ""),
+    }
+
+
+@app.post("/api/ncm/qr/check")
+async def ncm_qr_check(body: dict):
+    key = body.get("key", "")
+    if not key:
+        raise HTTPException(400, "缺少 key")
+    data = await get_ncm().check_qr_login(key)
+    code = data.get("code", -1)
+    result: dict = {"code": code}
+    if code == 803:
+        result["nickname"] = data.get("cookie", "")
+        result["avatarUrl"] = data.get("avatarUrl", "")
+    return result
+
+
+@app.post("/api/ncm/logout")
+async def ncm_logout():
+    return await get_ncm().logout()
+
+
+@app.get("/api/ncm/playlists")
+async def ncm_playlists(uid: str):
+    return await get_ncm().get_user_playlists(uid)
+
+
+@app.get("/api/ncm/playlist/{playlist_id}/tracks")
+async def ncm_playlist_tracks(playlist_id: str):
+    return await get_ncm().get_playlist_tracks(playlist_id)
+
+
+@app.get("/api/ncm/search")
+async def ncm_search(keywords: str, page: int = 1):
+    return await get_ncm().search(keywords, page)
+
+
+@app.get("/api/ncm/song/{song_id}/url")
+async def ncm_song_url(song_id: str, level: str = "standard"):
+    return await get_ncm().get_song_url(song_id, level)
+
+
+@app.get("/api/ncm/song/{song_id}/detail")
+async def ncm_song_detail(song_id: str):
+    return await get_ncm().get_song_detail(song_id)
+
+
+@app.get("/api/ncm/song/{song_id}/lyric")
+async def ncm_song_lyric(song_id: str):
+    return await get_ncm().get_lyric(song_id)

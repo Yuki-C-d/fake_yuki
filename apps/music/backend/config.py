@@ -11,5 +11,8 @@ MUSIC_DIR = os.path.join(BASE_DIR, "music-files")
 # SQLite 数据库路径
 DB_PATH = os.path.join(BASE_DIR, "apps", "music", "data", "music.db")
 
+# 网易云音乐 API 代理地址
+NCM_API_BASE_URL = "http://127.0.0.1:3000"
+
 # 支持的音频格式
 SUPPORTED_FORMATS = {".flac", ".m4a"}
