@@ -5,13 +5,6 @@ auth.token = "mv-frp-token-2026-07-10"
 auth.method = "token"
 
 [[proxies]]
-name = "music-vault"
-type = "tcp"
-localIP = "127.0.0.1"
-localPort = 8080
-remotePort = 8080
-
-[[proxies]]
 name = "gw-ws"
 type = "tcp"
 localIP = "127.0.0.1"
