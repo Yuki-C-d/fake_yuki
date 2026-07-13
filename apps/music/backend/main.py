@@ -185,17 +185,21 @@ async def upload_song(file: UploadFile = File(...)):
         raise HTTPException(409, f"文件已存在: {existing}")
 
     dest = os.path.join(config.MUSIC_DIR, safe_name)
+    print(f"[UPLOAD] 开始上传: {safe_name} -> {dest}", flush=True)
 
     # 4. 写入磁盘
     try:
         with open(dest, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        print(f"[UPLOAD] 写入完成: {os.path.getsize(dest)} bytes", flush=True)
     except Exception as e:
+        print(f"[UPLOAD] 写入失败: {e}", flush=True)
         raise HTTPException(500, f"写入文件失败: {e}")
 
     # 5. NCM 解密（如果是 .ncm 文件）
     scanned_path = dest
     if ext == ".ncm":
+        print(f"[NCM] 开始解密: {dest}", flush=True)
         try:
             result = subprocess.run(
                 ["python3", NCMDUMP, dest],
@@ -203,7 +207,10 @@ async def upload_song(file: UploadFile = File(...)):
             )
             if result.returncode != 0:
                 os.remove(dest)
-                stdout = result.stdout.strip() if result.stdout else ""; stderr = result.stderr.strip() if result.stderr else ""; raise HTTPException(400, f"NCM 解密失败 [exit={result.returncode}]: stdout={stdout} stderr={stderr}")
+                stdout = (result.stdout or "").strip()
+                stderr = (result.stderr or "").strip()
+                print(f"[NCM] 解密失败 rc={result.returncode} stdout={stdout[:500]} stderr={stderr[:500]}", flush=True)
+                raise HTTPException(400, f"NCM 解密失败 [exit={result.returncode}]: stdout={stdout} stderr={stderr}")
         except subprocess.TimeoutExpired:
             os.remove(dest)
             raise HTTPException(400, "NCM 解密超时")
@@ -228,10 +235,12 @@ async def upload_song(file: UploadFile = File(...)):
             candidate = os.path.join(config.MUSIC_DIR, base_noext + try_ext)
             if os.path.exists(candidate):
                 scanned_path = candidate
+                print(f"[NCM] 找到输出文件: {candidate}", flush=True)
                 break
 
         if scanned_path is None:
             listing = os.listdir(config.MUSIC_DIR)
+            print(f"[NCM] 未找到输出文件 base={base_noext} dir={listing}", flush=True)
             raise HTTPException(400, f"NCM 解密完成但未找到输出文件。base={base_noext} dir={listing}")
 
     # 6. AV3A 检测：排除伪装的 FLAC 文件
