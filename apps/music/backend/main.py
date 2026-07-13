@@ -67,6 +67,38 @@ def index():
         return HTMLResponse(f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
 
+# ── PWA & 静态文件 ──
+FRONTEND_DIR = "apps/music/frontend"
+
+
+def _serve_static(path: str, mime: str, cache: str = "public, max-age=86400"):
+    return FileResponse(
+        os.path.join(FRONTEND_DIR, path),
+        media_type=mime,
+        headers={"Cache-Control": cache},
+    )
+
+
+@app.get("/manifest.json")
+def pwa_manifest():
+    return _serve_static("manifest.json", "application/json")
+
+
+@app.get("/sw.js")
+def pwa_sw():
+    return _serve_static("sw.js", "application/javascript", "no-cache")
+
+
+@app.get("/wallpaper.jpg")
+def wallpaper():
+    return _serve_static("wallpaper.jpg", "image/jpeg")
+
+
+@app.get("/icons/{name}")
+def pwa_icon(name: str):
+    return _serve_static(f"icons/{name}", "image/png")
+
+
 @app.get("/test")
 def test_page():
     with open("apps/music/frontend/test.html", encoding="utf-8") as f:
