@@ -127,7 +127,7 @@ def stream_song(song_id: int):
 ALLOWED_UPLOAD_EXTENSIONS = {".m4a", ".flac", ".mp3", ".ogg", ".wav", ".aac", ".wma", ".mp4", ".ncm"}
 
 # ncmdump 解密工具路径
-NCMDUMP = os.path.join(config.BASE_DIR, "tools", "ncmdump.exe")
+NCMDUMP = os.path.join(config.BASE_DIR, "tools", "ncm_decrypt.py")
 
 
 def _is_real_audio_file(filepath: str) -> bool:
@@ -198,7 +198,7 @@ async def upload_song(file: UploadFile = File(...)):
     if ext == ".ncm":
         try:
             result = subprocess.run(
-                [NCMDUMP, "-o", config.MUSIC_DIR, dest],
+                ["python3", NCMDUMP, dest],
                 capture_output=True, text=True, timeout=120,
             )
             if result.returncode != 0:
