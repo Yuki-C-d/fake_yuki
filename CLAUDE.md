@@ -5,8 +5,10 @@
 ## 目录结构
 
 ```
+apps/home/      - 🏠 个人主站（Hero + 功能卡片 + 随手记）
 apps/music/     - 🎵 音乐播放器 (FastAPI + SQLite)
 apps/nav/       - 🔗 导航站 (GitHub Pages → fake-star.xyz)
+yuki_风格/      - 🎨 全站视觉设计规范（利兹与青鸟 × 玻璃童话）
 server/         - ☁️ ECS + frp 服务器配置
 music-files/    - 🎵 音乐文件 (不入 git)
 tools/          - 🔧 转码工具
@@ -16,8 +18,13 @@ docs/           - 📄 项目文档
 ## 启动命令
 
 ```bash
+# 音乐站
 cd D:\fake_yuki
 python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080
+
+# 主站（本地预览）
+cd D:\fake_yuki\apps\home
+python -m http.server 3000
 ```
 
 ## 关键配置

@@ -35,5 +35,6 @@ server/frpc/frpc.log
 # 服务器凭证 & 密钥
 server/server.env
 server/keys/
-.server/
+# 静态资源大图（部署时再传）
+apps/home/wallpaper.jpg
 apps/nav/

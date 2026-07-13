@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fake-star · 此方的个人站点</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
+:root {
+  /* 配色 — yuki_风格 */
+  --c-blue:     #4A7A9A;
+  --c-blue-lt:  #7DAEC8;
+  --c-blue-dk:  #2E5F78;
+  --c-warm:     #E8683A;
+  --c-grass:    #7EB87E;
+  --c-straw:    #E8C87A;
+  --c-coral:    #C4716E;
+  --c-text:     #2D2D2D;
+  --c-text-lt:  #6A6A6A;
+  --f-serif:    'Noto Serif SC', 'FangSong', '仿宋', 'FZFS', serif;
+
+  /* 间距 */
+  --sp:  8px;
+  --sp2: 16px;
+  --sp3: 24px;
+  --sp4: 32px;
+  --sp6: 48px;
+  --sp8: 64px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--f-serif);
+  font-weight: 500;
+  line-height: 2.1;
+  color: var(--c-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: #C4DFF0;
+}
+
+/* ===== 壁纸层 ===== */
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+/* TODO: 替换为你的 Pixiv 壁纸 */
+.wallpaper-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+.wallpaper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.04) 0%,
+    transparent 25%,
+    transparent 60%,
+    rgba(0,0,0,0.08) 85%,
+    rgba(0,0,0,0.12) 100%
+  );
+}
+
+/* 缺省壁纸 — 纯色渐变 */
+.wallpaper-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    170deg,
+    #C4DFF0 0%,
+    #B8D8E8 25%,
+    #D0E8F5 50%,
+    #C8DCE8 75%,
+    #B0D0E0 100%
+  );
+}
+
+/* ===== SVG 噪点纹理 ===== */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ====================================
+   Hero
+   ==================================== */
+.hero {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100vh;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-inner {
+  color: white;
+  padding: var(--sp4);
+  max-width: 680px;
+}
+
+.hero-inner h1 {
+  font-family: var(--f-serif);
+  font-size: 3.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.22);
+  margin-bottom: 4px;
+}
+
+.hero-inner .tagline {
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  opacity: 0.78;
+  text-shadow: 0 2px 15px rgba(0,0,0,0.12);
+  margin-bottom: var(--sp4);
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.45);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  animation: bob 2.2s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(7px); }
+}
+
+/* ====================================
+   内容区 毛玻璃卡片
+   ==================================== */
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--sp4) var(--sp6) 120px;
+
+  /* 青鸟水印 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 100'%3E%3Cpolygon points='120,50 20,10 55,45' fill='%234A7A9A' opacity='0.7'/%3E%3Cpolygon points='120,50 220,10 185,45' fill='%234A7A9A' opacity='0.7'/%3E%3Cellipse cx='120' cy='52' rx='14' ry='7' fill='%234A7A9A' opacity='0.6'/%3E%3Ccircle cx='120' cy='39' r='7' fill='%234A7A9A' opacity='0.6'/%3E%3Cpolygon points='114,57 98,74 120,62' fill='%234A7A9A' opacity='0.5'/%3E%3Cpolygon points='126,57 142,74 120,62' fill='%234A7A9A' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 120px;
+  background-size: 280px auto;
+}
+
+/* 勿忘我藤蔓 */
+.content::after {
+  content: '';
+  display: block;
+  height: 44px;
+  margin-top: var(--sp2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 36'%3E%3Cpath d='M30 28 Q80 10 130 20 Q180 8 230 16 Q270 10 290 16' stroke='%237EB87E' stroke-width='2' opacity='0.35' fill='none'/%3E%3Cg transform='translate(70,12)'%3E%3Cellipse cx='0' cy='-2.5' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4'/%3E%3Cellipse cx='3.2' cy='-0.5' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(72)'/%3E%3Cellipse cx='1.8' cy='2.2' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(144)'/%3E%3Cellipse cx='-1.8' cy='2.2' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(216)'/%3E%3Cellipse cx='-3.2' cy='-0.5' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(288)'/%3E%3Ccircle cx='0' cy='0' r='1.2' fill='%23F5E6A0' opacity='0.4'/%3E%3C/g%3E%3Cg transform='translate(150,10)'%3E%3Cellipse cx='0' cy='-2.5' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4'/%3E%3Cellipse cx='3.2' cy='-0.5' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(72)'/%3E%3Cellipse cx='1.8' cy='2.2' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(144)'/%3E%3Cellipse cx='-1.8' cy='2.2' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(216)'/%3E%3Cellipse cx='-3.2' cy='-0.5' rx='2.5' ry='4' fill='%234A7A9A' opacity='0.4' transform='rotate(288)'/%3E%3Ccircle cx='0' cy='0' r='1.2' fill='%23F5E6A0' opacity='0.4'/%3E%3C/g%3E%3Cg transform='translate(240,12)'%3E%3Cellipse cx='0' cy='-2' rx='2' ry='3.2' fill='%234A7A9A' opacity='0.35'/%3E%3Cellipse cx='2.8' cy='-0.5' rx='2' ry='3.2' fill='%234A7A9A' opacity='0.35' transform='rotate(72)'/%3E%3Cellipse cx='1.5' cy='2' rx='2' ry='3.2' fill='%234A7A9A' opacity='0.35' transform='rotate(144)'/%3E%3Cellipse cx='-1.5' cy='2' rx='2' ry='3.2' fill='%234A7A9A' opacity='0.35' transform='rotate(216)'/%3E%3Cellipse cx='-2.8' cy='-0.5' rx='2' ry='3.2' fill='%234A7A9A' opacity='0.35' transform='rotate(288)'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%23F5E6A0' opacity='0.4'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 85% auto;
+  opacity: 0.6;
+}
+
+/* ===== 毛玻璃卡片 ===== */
+.glass-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(28px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-radius: 24px;
+  padding: var(--sp6) var(--sp6) 64px;
+  margin-bottom: 112px;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.02),
+    0 8px 24px rgba(0,0,0,0.04),
+    0 20px 60px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: box-shadow 0.3s;
+}
+
+.glass-card:hover {
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.03),
+    0 12px 32px rgba(0,0,0,0.05),
+    0 24px 72px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.glass-card h2 {
+  font-family: var(--f-serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--c-blue-dk);
+  margin-bottom: var(--sp4);
+  padding-bottom: var(--sp2);
+  border-bottom: 1px solid rgba(74,122,154,0.1);
+  letter-spacing: 0.04em;
+}
+
+/* ===== 功能卡片网格 ===== */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp6);
+  margin-bottom: var(--sp6);
+}
+
+.feature-card {
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(28px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-radius: 24px;
+  padding: var(--sp4);
+  border: 1px solid rgba(255,255,255,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.02),
+    0 8px 24px rgba(0,0,0,0.04),
+    0 20px 60px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 16px rgba(0,0,0,0.05),
+    0 16px 40px rgba(0,0,0,0.06),
+    0 28px 80px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.feature-card .tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 2px 14px;
+  border-radius: 30px;
+  margin-bottom: var(--sp);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.feature-card h3 {
+  font-family: var(--f-serif);
+  font-size: 1.1rem;
+  color: var(--c-blue-dk);
+  margin-bottom: var(--sp);
+  letter-spacing: 0.03em;
+}
+
+.feature-card p {
+  font-size: 0.82rem;
+  color: var(--c-text-lt);
+  line-height: 1.8;
+}
+
+.feature-card .status {
+  display: inline-block;
+  font-size: 0.62rem;
+  padding: 1px 10px;
+  border-radius: 30px;
+  margin-top: var(--sp);
+  letter-spacing: 0.05em;
+}
+
+/* 标签颜色 */
+.tag.music { background: rgba(74,122,154,0.15);  color: var(--c-blue-dk); }
+.tag.nav   { background: rgba(232,200,122,0.2);  color: #7A6A3A; }
+.tag.photo { background: rgba(232,104,58,0.12);  color: #B84A2A; }
+.tag.soon  { background: rgba(0,0,0,0.05);       color: var(--c-text-lt); }
+
+.status.live  { background: rgba(126,184,126,0.15); color: #4A7A4A; }
+.status.wip   { background: rgba(232,200,122,0.15); color: #7A6A3A; }
+.status.wait  { background: rgba(0,0,0,0.05);       color: var(--c-text-lt); }
+
+/* ===== 随手记 ===== */
+.note-item {
+  border-bottom: 1px solid rgba(74,122,154,0.06);
+  padding: var(--sp3) 0;
+}
+
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.note-item .note-date {
+  font-size: 0.72rem;
+  color: var(--c-text-lt);
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp);
+}
+
+.note-item .note-body {
+  font-size: 0.9rem;
+  color: var(--c-text);
+  line-height: 2.1;
+}
+
+.note-item .note-body img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-top: var(--sp);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.note-placeholder {
+  text-align: center;
+  color: var(--c-text-lt);
+  padding: var(--sp6) 0 var(--sp4);
+  font-size: 0.85rem;
+  opacity: 0.5;
+}
+
+/* ===== Footer ===== */
+.footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: var(--sp3) var(--sp4) var(--sp4);
+  color: var(--c-text-lt);
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+.footer .divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: var(--sp3);
+}
+
+.footer .divider .line {
+  width: 40px; height: 1px;
+  background: var(--c-text-lt);
+}
+
+.footer .divider .dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--c-text-lt);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .hero-inner h1 { font-size: 2.2rem; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .content { padding: 0 var(--sp2) var(--sp4); }
+  .glass-card { padding: var(--sp4) var(--sp4) 48px; margin-bottom: var(--sp6); }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 壁纸 ===== -->
+<div class="wallpaper">
+  <img class="wallpaper-bg" src="wallpaper.jpg" alt="">
+</div>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1>fake-star</h1>
+    <p class="tagline">此方的个人站点</p>
+  </div>
+  <div class="scroll-hint">scroll ↓</div>
+</section>
+
+<!-- ===== 内容区 ===== -->
+<div class="content">
+
+  <!-- ── 功能站入口卡片 ── -->
+  <div class="glass-card">
+    <h2>📦 功能站</h2>
+    <div class="feature-grid">
+      <!-- 音乐 -->
+      <a class="feature-card" href="http://8.166.119.185:8080">
+        <span class="tag music">🎵 音乐</span>
+        <h3>Yuki 的小曲</h3>
+        <p>自建音乐云，浏览器听歌。サカナクション、花譜、あいみょん……</p>
+        <span class="status live">● 运行中</span>
+      </a>
+
+      <!-- 书签/导航 -->
+      <a class="feature-card" href="https://fake-star.xyz">
+        <span class="tag nav">🔗 书签</span>
+        <h3>好玩的网址</h3>
+        <p>收藏有意思的网站，分类整理随时取用。</p>
+        <span class="status live">● 运行中</span>
+      </a>
+
+      <!-- 摄影 -->
+      <div class="feature-card">
+        <span class="tag photo">📷 摄影</span>
+        <h3>Z30 日常</h3>
+        <p>尼康 Z30 新手练习，光影构图慢慢摸索。</p>
+        <span class="status wait">○ 待建站</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 日常随手记 ── -->
+  <div class="glass-card">
+    <h2>📝 随手记</h2>
+    <div class="note-placeholder">
+      碎碎念 · 日常照片 · 偶尔想法<br>
+      这里暂时是空的，很快就有东西了。
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+  <div class="divider">
+    <span class="line"></span>
+    <span class="dot"></span>
+    <span style="margin:0 4px;">✦</span>
+    <span class="dot"></span>
+    <span class="line"></span>
+  </div>
+  fake-star · 此方 &amp; Yuki · 2026
+  <br><small>Background art from Pixiv</small>
+</div>
+
+</body>
+</html>

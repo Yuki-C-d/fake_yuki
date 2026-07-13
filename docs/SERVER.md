@@ -1,6 +1,6 @@
 # ☁️ fake_yuki 服务器文档
 
-> 最后更新: 2026-07-11
+> 最后更新: 2026-07-13
 
 ---
 
@@ -196,7 +196,7 @@ rm /tmp/node.tar.xz
 | frp 隧道断了 | 浏览器打开 `http://8.166.119.185:7500` 查看 |
 | frps 挂了 | `ssh root@8.166.119.185 "systemctl status frps"` |
 | frpc 挂了 | 本地 `tasklist \| findstr frpc`，没有就手动启动 |
-| SSH 连不上 | 检查 `id_ed25519` 文件是否在、阿里云安全组 22 端口是否开放 |
+| SSH 连不上 | 检查 `server/keys/id_ed25519` 文件是否在、阿里云安全组 22 端口是否开放 |
 | ECS node 离线 | `ssh root@8.166.119.185 "ps aux \| grep openclaw"`，必要时手动启动 |
 
 ---
@@ -211,4 +211,4 @@ rm /tmp/node.tar.xz
 
 ---
 
-*本文档涵盖截至 2026-07-11 的所有服务器配置。OpenClaw node 部署问题详见 `docs/archive/PROGRESS.md`。*
+*本文档涵盖截至 2026-07-13 的所有服务器配置。*
