@@ -1,7 +1,7 @@
 # fake_yuki 项目手册
 
 > 个人网站项目集合 — 此方 & Yuki ❄️  
-> 最后更新: 2026-07-13
+> 最后更新: 2026-07-14
 
 ---
 
@@ -51,7 +51,8 @@
 |------|------|
 | 后端 | FastAPI (Python 3.13) |
 | 数据库 | SQLite (`apps/music/data/music.db`) |
-| 前端 | 纯 HTML + JS（暗色 Spotify 风格） |
+| 前端 | 纯 HTML + JS（yuki_风格 玻璃童话） |
+| 音源 | 本地文件 + 网易云音乐（扫码登录流播放） |
 | 本地地址 | `http://localhost:8080` |
 | 外网地址 | `http://8.166.119.185:8080` |
 | API 文档 | `http://localhost:8080/docs` |
@@ -76,7 +77,7 @@
 
 **playlist_songs 表** — id / playlist_id (FK) / song_id (FK) / position
 
-### API 端点 (16 个)
+### API 端点 (27 个)
 
 **歌曲**
 
@@ -104,23 +105,43 @@
 
 **支持的音频格式**: `.m4a` `.mp3` `.flac` `.ogg` `.wav` `.aac`
 
+**网易云代理**（通过 NeteaseCloudMusicApi 侧车，ECS :3000）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/ncm/status` | 登录状态 |
+| GET | `/api/ncm/qr/key` | 获取扫码 key |
+| GET | `/api/ncm/qr/create` | 生成二维码 |
+| POST | `/api/ncm/qr/check` | 轮询扫码结果 |
+| POST | `/api/ncm/logout` | 退出登录 |
+| GET | `/api/ncm/playlists` | 用户歌单 |
+| GET | `/api/ncm/playlist/{id}/tracks` | 歌单歌曲 |
+| GET | `/api/ncm/search` | 搜索 |
+| GET | `/api/ncm/song/{id}/url` | 获取播放链接 |
+| GET | `/api/ncm/song/{id}/detail` | 歌曲详情 |
+| GET | `/api/ncm/song/{id}/lyric` | 歌词 |
+
 ### 关键代码文件
 
 | 文件 | 作用 |
 |------|------|
-| `apps/music/backend/main.py` | FastAPI 入口，16 个路由 |
+| `apps/music/backend/main.py` | FastAPI 入口，27 个路由 |
+| `apps/music/backend/ncm_client.py` | 网易云 API 异步代理（httpx） |
 | `apps/music/backend/models.py` | SQLite 操作，3 张表，外键级联 |
 | `apps/music/backend/scanner.py` | 遍历 music-files/ → mutagen 读标签 → 入库 |
-| `apps/music/backend/config.py` | BASE_DIR / MUSIC_DIR / DB_PATH |
-| `apps/music/frontend/index.html` | 播放器 + 上传 + 歌单 + 搜索 + 右键菜单 |
+| `apps/music/backend/config.py` | BASE_DIR / MUSIC_DIR / DB_PATH / NCM_API_BASE_URL |
+| `apps/music/frontend/index.html` | yuki_风格 SPA：双源切换 + 播放器 + 歌单 + 上传 |
 
 ### 已实现功能
 
-- 播放器：切歌、搜索、键盘快捷键、进度条拖动、暗色主题
+- 播放器：切歌、搜索、键盘快捷键、yuki_风格玻璃童话 UI
+- 双音源：[本地音乐] / [网易云] 一键切换
+- 网易云：扫码登录 → 歌单浏览 → CDN 流播放（不下载）
 - 上传：拖拽/点击、去重、NCM 自动解密
-- 转码：AV3A 自动检测、后台转码队列、完成后自动入库
+- 转码：AV3A 自动检测（仅本地 Windows 支持）
 - 歌单：创建/重命名/删除、右键添加/移除、排序
 - 安全：路径穿越防护 (`safe_file_path`)、数据库连接管理 (`closing()`)
+- PWA：manifest + service worker，手机可安装
 
 ---
 
@@ -241,9 +262,19 @@ npm config set registry https://registry.npmmirror.com
 
 | 操作 | 命令 |
 |------|------|
-| 启动音乐服务 | `cd D:\fake_yuki && python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080` |
+| 启动音乐服务（本地） | `cd D:\fake_yuki && python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080` |
 | 手动扫描歌曲 | `curl -X POST http://127.0.0.1:8080/api/scan` |
 | 查看曲库 | `curl http://127.0.0.1:8080/api/songs` |
+
+### ECS 服务管理
+
+| 操作 | 命令 | 在哪跑 |
+|------|------|--------|
+| 查看音乐站状态 | `systemctl status fake-yuki-music` | ECS |
+| 重启音乐站 | `systemctl restart fake-yuki-music` | ECS |
+| 查看 NCM API 状态 | `systemctl status ncmapi` | ECS |
+| 重启 NCM API | `systemctl restart ncmapi` | ECS |
+| 音乐站日志 | `journalctl -u fake-yuki-music -f` | ECS |
 
 ### frp
 
@@ -279,6 +310,7 @@ npm config set registry https://registry.npmmirror.com
 | **2026-07-11** | OpenClaw ECS node 部署，导航站 fake-star.xyz 上线，项目重命名 fake_yuki + 模块化 + 推 GitHub |
 | **2026-07-12** | yuki_风格 设计系统定稿（利兹与青鸟 × 蜡笔颗粒感 × 玻璃童话） |
 | **2026-07-13** | 个人主站骨架搭建（Hero + 功能卡片 + 随手记），yuki_风格 首次落地 |
+| **2026-07-14** | 音乐站重构：yuki_风格前端 + 网易云双音源（NeteaseCloudMusicApi侧车 + 扫码登录流播放），PWA 支持，ECS 全栈部署 |
 
 ### 下一步
 

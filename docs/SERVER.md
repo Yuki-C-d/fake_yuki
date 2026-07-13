@@ -73,6 +73,8 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | 服务 | 状态 | 管理方式 | 开机自启 |
 |------|------|----------|----------|
 | **frps** | ✅ active | `systemctl {start\|stop\|restart\|status} frps` | ✅ |
+| **fake-yuki-music** | ✅ active | FastAPI 音乐站 (端口 8080) | ✅ |
+| **ncmapi** | ✅ active | NeteaseCloudMusicApi (端口 3000) | ✅ |
 | **SSH** | ✅ active | `systemctl {start\|stop\|restart} sshd` | ✅ |
 | **OpenClaw node** | ⚠️ 手动启动 | 见下方 | ❌ |
 
@@ -211,4 +213,4 @@ rm /tmp/node.tar.xz
 
 ---
 
-*本文档涵盖截至 2026-07-13 的所有服务器配置。*
+*本文档涵盖截至 2026-07-14 的所有服务器配置。*

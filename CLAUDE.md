@@ -6,7 +6,7 @@
 
 ```
 apps/home/      - 🏠 个人主站（Hero + 功能卡片 + 随手记）
-apps/music/     - 🎵 音乐播放器 (FastAPI + SQLite)
+apps/music/     - 🎵 音乐播放器（本地+网易云双源，yuki_风格）
 apps/nav/       - 🔗 导航站 (GitHub Pages → fake-star.xyz)
 yuki_风格/      - 🎨 全站视觉设计规范（利兹与青鸟 × 玻璃童话）
 server/         - ☁️ ECS + frp 服务器配置
@@ -31,7 +31,10 @@ python -m http.server 3000
 
 - **服务器**: 阿里云 ECS 8.166.119.185 (Ubuntu 22.04)
 - **SSH**: `server/keys/id_ed25519`
-- **frpc**: `server/frpc/frpc.toml` (开机自启)
+- **ECS 服务**: 
+  - `fake-yuki-music` — FastAPI :8080
+  - `ncmapi` — NeteaseCloudMusicApi :3000 (网易云代理)
+  - `frps` — frp 服务端
 - **外网**: `http://8.166.119.185:8080`
 
 ## 查看项目
