@@ -136,20 +136,39 @@ def _is_real_audio_file(filepath: str) -> bool:
     排除伪装的 AV3A/MP4 文件（head 为 ftyp/isom 但实际上需要转码）。
     """
     ext = os.path.splitext(filepath)[1].lower()
-    # 已知安全格式（浏览器原生支持）
-    if ext in {".m4a", ".mp3", ".ogg", ".wav", ".aac"}:
+    # 已知安全格式（浏览器原生支持）— 但需要排除 AV3A 伪装的 MP4 容器
+    if ext in {".mp3", ".ogg", ".wav", ".aac"}:
         return True
-    # .flac 需要验证：真正的 FLAC 以 "fLaC" 开头，AV3A 以 MP4 ftyp box 开头
-    if ext == ".flac":
+    # .m4a / .flac / .mp4 需要验证：检测是否为 AV3A 伪装
+    if ext in {".m4a", ".flac", ".mp4"}:
         try:
             with open(filepath, "rb") as f:
                 header = f.read(12)
             # 真 FLAC: 前4字节 "fLaC"
             if header[:4] == b"fLaC":
                 return True
-            # MP4 容器 (AV3A 伪装): offset 4-8 为 "ftyp"
-            if len(header) >= 12 and header[4:8] == b"ftyp":
-                return False
+            # MP4 容器 — 检查是否为 AV3A
+            if len(header) >= 8 and header[4:8] == b"ftyp":
+                # 进一步读取 stsd box 中的编码格式
+                try:
+                    full = f.read(8192)
+                except Exception:
+                    full = header
+                # 查 ftyp major brand 是否为 av3a
+                if b"av3a" in full[:100].lower() or b"AV3A" in full[:100]:
+                    return False
+                # 查 stsd box 中的编码名
+                stsd_idx = full.find(b"stsd")
+                if stsd_idx > 0 and len(full) > stsd_idx + 20:
+                    # stsd 之后 8 字节跳过 header，取 sample entry
+                    sample = full[stsd_idx+12:stsd_idx+16]
+                    # 常见 AV3A codec: 'av3a', 'AV3A', 或 sample entry 为 'mp4a' 但实际 AV3A
+                    # 如果 ftyp 不是标准 M4A，且 stsd 异常，可能是 AV3A
+                    ftyp_brand = full[8:12]
+                    if ftyp_brand in (b"av3a", b"AV3A", b"isom"):
+                        # isom 容器 + 不是 AAC → 极可能是 AV3A
+                        return False
+                return False  # 非 fLaC 的 ftyp 文件 → 不是浏览器可播格式
         except Exception:
             pass
     # 未识别格式，保守起见返回 True（让 scanner 处理）
