@@ -264,26 +264,19 @@ async def upload_song(file: UploadFile = File(...)):
 
     # 6. AV3A 检测：排除伪装的 FLAC 文件
     if not _is_real_audio_file(scanned_path):
-        # AV3A/MP4 伪装文件，文件已保存在 music/ 根目录
-        # 后台自动启动转码流水线
+        # AV3A/MP4 伪装文件 — 服务器 (Linux) 无法解码 AV3A
+        # av3a_decoder.exe 仅 Windows，需本地转码后重新上传
         filename = os.path.basename(scanned_path)
-        convert_script = os.path.join(config.BASE_DIR, "tools", "convert_to_m4a.sh")
-
-        def _run_convert():
-            subprocess.Popen(
-                ["bash", convert_script],
-                cwd=config.BASE_DIR,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-
-        import threading
-        threading.Thread(target=_run_convert, daemon=True).start()
-
+        size_mb = os.path.getsize(scanned_path) / 1048576
+        # 保留文件在 originals/，方便下载回本地转码
+        originals_dir = os.path.join(config.MUSIC_DIR, "originals")
+        os.makedirs(originals_dir, exist_ok=True)
+        import shutil as _shutil
+        _shutil.move(scanned_path, os.path.join(originals_dir, filename))
         return {
-            "status": "converting",
+            "status": "av3a_detected",
             "filename": filename,
-            "message": f"转码已启动，预计 30-50 分钟。完成后自动入库，届时刷新页面即可。",
+            "message": f"AV3A 编码 ({size_mb:.1f}MB)，需在本地用 av3a_decoder.exe 转码。文件已保存到 originals/，转码后重新上传 AAC/M4A。",
         }
 
     # 7. 扫描入库
