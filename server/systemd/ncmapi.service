@@ -1,0 +1,13 @@
+[Unit]
+Description=NeteaseCloudMusicApi
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/NeteaseCloudMusicApi
+ExecStart=/usr/local/node-v24.16.0-linux-x64/bin/node app.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
