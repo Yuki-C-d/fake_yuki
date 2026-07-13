@@ -203,7 +203,7 @@ async def upload_song(file: UploadFile = File(...)):
             )
             if result.returncode != 0:
                 os.remove(dest)
-                raise HTTPException(400, f"NCM 解密失败: {result.stderr or result.stdout}")
+                stdout = result.stdout.strip() if result.stdout else ""; stderr = result.stderr.strip() if result.stderr else ""; raise HTTPException(400, f"NCM 解密失败 [exit={result.returncode}]: stdout={stdout} stderr={stderr}")
         except subprocess.TimeoutExpired:
             os.remove(dest)
             raise HTTPException(400, "NCM 解密超时")
@@ -231,7 +231,8 @@ async def upload_song(file: UploadFile = File(...)):
                 break
 
         if scanned_path is None:
-            raise HTTPException(400, "NCM 解密完成但未找到输出文件")
+            listing = os.listdir(config.MUSIC_DIR)
+            raise HTTPException(400, f"NCM 解密完成但未找到输出文件。base={base_noext} dir={listing}")
 
     # 6. AV3A 检测：排除伪装的 FLAC 文件
     if not _is_real_audio_file(scanned_path):
