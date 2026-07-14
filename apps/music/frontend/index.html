@@ -432,7 +432,18 @@ function showCtxMenu(e, type, targetId) {
   if (isSong && playlists.length > 0) {
     ctxSubPlaylist.innerHTML = playlists.map(p =>
       `<div class="ctx-item" data-pl-id="${p.id}">📋 ${esc(p.name)}</div>`
-    ).join('');
+    ).join('') + (playlists.length === 0 ? `<div class="ctx-item" style="color:var(--c-text-lt);">（暂无歌单，请先在侧边栏创建）</div>` : '') +
+    `<div class="ctx-item" id="ctxSubNewPlaylist" style="border-top:1px solid rgba(74,122,154,0.08);">＋ 新建歌单</div>`;
+    // "新建歌单" entry
+    const newPlBtn = ctxSubPlaylist.querySelector('#ctxSubNewPlaylist');
+    if (newPlBtn) newPlBtn.addEventListener('click', async () => {
+      hideCtxMenu();
+      const name = prompt('歌单名称：');
+      if (!name?.trim()) return;
+      await fetch('/api/playlists', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim() }) });
+      toast('✅ 已创建');
+      await loadPlaylists();
+    });
     ctxSubPlaylist.querySelectorAll('.ctx-item').forEach(item => {
       item.addEventListener('click', async () => {
         hideCtxMenu();
@@ -460,9 +471,12 @@ function showCtxMenu(e, type, targetId) {
   e.preventDefault();
 }
 
-// Show submenu on hover over "添加到歌单"
-ctxAddToPlaylist.addEventListener('mouseenter', () => { ctxSubPlaylist.style.display = ''; });
-ctxAddToPlaylist.addEventListener('mouseleave', () => { ctxSubPlaylist.style.display = 'none'; });
+// Toggle submenu on click (avoids hover issues on mobile/touch)
+ctxAddToPlaylist.addEventListener('click', e => {
+  e.stopPropagation();
+  const vis = ctxSubPlaylist.style.display === 'none';
+  ctxSubPlaylist.style.display = vis ? '' : 'none';
+});
 
 function hideCtxMenu() { ctxMenu.style.display = 'none'; ctxType = null; ctxTargetId = null; }
 document.addEventListener('click', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
@@ -470,33 +484,36 @@ document.addEventListener('contextmenu', e => { if (!ctxMenu.contains(e.target))
 
 // Context menu actions
 ctxRemoveFromPlaylist.addEventListener('click', async () => {
+  const sid = ctxTargetId, pid = currentPlaylistId;
   hideCtxMenu();
-  if (!ctxTargetId || !currentPlaylistId) return;
-  const r = await fetch(`/api/playlists/${currentPlaylistId}/songs/${ctxTargetId}`, { method: 'DELETE' });
+  if (!sid || !pid) return;
+  const r = await fetch(`/api/playlists/${pid}/songs/${sid}`, { method: 'DELETE' });
   if (r.ok) { toast('✅ 已移除'); await loadPlaylists(); renderSongList(); }
   else toast('❌ 移除失败');
 });
 
 ctxRenamePlaylist.addEventListener('click', async () => {
+  const plId = ctxTargetId;
   hideCtxMenu();
-  if (!ctxTargetId) return;
-  const pl = playlists.find(p => p.id === ctxTargetId);
+  if (!plId) return;
+  const pl = playlists.find(p => p.id === plId);
   const name = prompt('新名称：', pl?.name || '');
   if (!name?.trim()) return;
-  const r = await fetch(`/api/playlists/${ctxTargetId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim() }) });
+  const r = await fetch(`/api/playlists/${plId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim() }) });
   if (r.ok) { toast('✅ 已重命名'); await loadPlaylists(); }
   else toast('❌ 重命名失败');
 });
 
 ctxDeletePlaylist.addEventListener('click', async () => {
+  const plId = ctxTargetId;
   hideCtxMenu();
-  if (!ctxTargetId) return;
-  const pl = playlists.find(p => p.id === ctxTargetId);
+  if (!plId) return;
+  const pl = playlists.find(p => p.id === plId);
   if (!confirm(`确定删除歌单「${pl?.name}」？\n歌曲不会被删除。`)) return;
-  const r = await fetch(`/api/playlists/${ctxTargetId}`, { method: 'DELETE' });
+  const r = await fetch(`/api/playlists/${plId}`, { method: 'DELETE' });
   if (r.ok) {
     toast('✅ 已删除');
-    if (currentPlaylistId === ctxTargetId) { currentPlaylistId = null; switchSource(SOURCE.LOCAL); }
+    if (currentPlaylistId === plId) { currentPlaylistId = null; switchSource(SOURCE.LOCAL); }
     await loadPlaylists();
     renderSongList();
   } else toast('❌ 删除失败');
