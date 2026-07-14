@@ -447,10 +447,11 @@ function showCtxMenu(e, type, targetId) {
     });
     ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(item => {
       item.addEventListener('click', async () => {
-        hideCtxMenu();
+        const sid = ctxTargetId;
         const plId = parseInt(item.dataset.plId);
-        if (!plId) return;
-        const r = await fetch(`/api/playlists/${plId}/songs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ song_id: ctxTargetId }) });
+        hideCtxMenu();
+        if (!sid || !plId) return;
+        const r = await fetch('/api/playlists/' + plId + '/songs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ song_id: sid }) });
         if (r.ok) { toast('✅ 已添加到 ' + (playlists.find(p=>p.id===plId)?.name||'歌单')); await loadPlaylists(); }
         else toast('❌ 添加失败');
       });
