@@ -857,19 +857,25 @@ async function loadNcmLiked() {
     const uid = (ncmUser.profile || ncmUser).userId;
     const r = await fetch(`/api/ncm/likelist?uid=${uid}`);
     const d = await r.json();
-    if (d.code === 200 && d.ids) {
-      // likelist returns song IDs; get detail for each
-      const ids = d.ids.slice(0, 100).join(',');
-      const sr = await fetch(`/api/ncm/song/detail?ids=${ids}`);
-      const sd = await sr.json();
-      ncmTracks = (sd.data?.songs || sd.songs || []).map(s => ({
-        id: s.id, name: s.name, ar: s.ar||[], al: s.al||{}, dt: s.dt||0
-      }));
+    // likelist returns {ids:[...]} or {data:{ids:[...]}}
+    const idList = d.ids || d.data?.ids;
+    if (!idList || !idList.length) {
+      ncmTracks = [];
       switchSource(SOURCE.NETEASE);
       renderNcmTracks();
-      // Highlight liked entry
-      document.querySelectorAll('#ncmPlaylistNav li').forEach(l => l.classList.remove('active'));
+      toast('❤️ 你还没有喜欢的歌曲');
+      return;
     }
+    const ids = idList.slice(0, 500).join(',');
+    const sr = await fetch(`/api/ncm/song/detail?ids=${ids}`);
+    const sd = await sr.json();
+    const songList = sd.data?.songs || sd.songs || [];
+    ncmTracks = songList.map(s => ({
+      id: s.id, name: s.name, ar: s.ar||[], al: s.al||{}, dt: s.dt||0
+    }));
+    switchSource(SOURCE.NETEASE);
+    renderNcmTracks();
+    document.querySelectorAll('#ncmPlaylistNav li').forEach(l => l.classList.remove('active'));
   } catch (e) { toast('加载喜欢列表失败'); }
 }
 
