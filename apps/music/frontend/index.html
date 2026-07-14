@@ -422,17 +422,18 @@ function showCtxMenu(e, type, targetId) {
   ctxTargetId = targetId;
   const isSong = type === 'song';
   const inPlaylist = currentPlaylistId !== null && isSong && currentSource === SOURCE.LOCAL;
-  ctxAddToPlaylist.style.display = isSong && playlists.length > 0 ? '' : 'none';
+  ctxAddToPlaylist.style.display = isSong ? '' : 'none';
   ctxRemoveFromPlaylist.style.display = inPlaylist ? '' : 'none';
   ctxSepPlaylist.style.display = 'none';
   ctxRenamePlaylist.style.display = 'none';
   ctxDeletePlaylist.style.display = 'none';
   ctxSubPlaylist.style.display = 'none';
   // Build submenu for "add to playlist"
-  if (isSong && playlists.length > 0) {
-    ctxSubPlaylist.innerHTML = playlists.map(p =>
+  if (isSong) {
+    var plItems = playlists.map(p =>
       `<div class="ctx-item" data-pl-id="${p.id}">📋 ${esc(p.name)}</div>`
-    ).join('') + (playlists.length === 0 ? `<div class="ctx-item" style="color:var(--c-text-lt);">（暂无歌单，请先在侧边栏创建）</div>` : '') +
+    ).join('');
+    ctxSubPlaylist.innerHTML = (playlists.length > 0 ? plItems : `<div class="ctx-item" style="color:var(--c-text-lt);">暂无歌单</div>`) +
     `<div class="ctx-item" id="ctxSubNewPlaylist" style="border-top:1px solid rgba(74,122,154,0.08);">＋ 新建歌单</div>`;
     // "新建歌单" entry
     const newPlBtn = ctxSubPlaylist.querySelector('#ctxSubNewPlaylist');
@@ -444,10 +445,11 @@ function showCtxMenu(e, type, targetId) {
       toast('✅ 已创建');
       await loadPlaylists();
     });
-    ctxSubPlaylist.querySelectorAll('.ctx-item').forEach(item => {
+    ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(item => {
       item.addEventListener('click', async () => {
         hideCtxMenu();
         const plId = parseInt(item.dataset.plId);
+        if (!plId) return;
         const r = await fetch(`/api/playlists/${plId}/songs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ song_id: ctxTargetId }) });
         if (r.ok) { toast('✅ 已添加到 ' + (playlists.find(p=>p.id===plId)?.name||'歌单')); await loadPlaylists(); }
         else toast('❌ 添加失败');
