@@ -487,7 +487,10 @@ ctxAddToPlaylist.addEventListener('click', e => {
 
 function hideCtxMenu() { ctxMenu.style.display = 'none'; ctxType = null; ctxTargetId = null; }
 document.addEventListener('click', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
-document.addEventListener('contextmenu', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
+// Let song/playlist handlers show menu first, then check
+document.addEventListener('contextmenu', e => {
+  setTimeout(() => { if (ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) hideCtxMenu(); }, 0);
+});
 
 // Context menu actions
 ctxRemoveFromPlaylist.addEventListener('click', async () => {
