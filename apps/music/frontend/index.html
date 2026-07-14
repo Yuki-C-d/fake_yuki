@@ -764,9 +764,12 @@ async function checkNcmStatus() {
   try {
     const r = await fetch('/api/ncm/status');
     const d = await r.json();
-    if (d.code === 200 && d.data?.account) {
+    // NCM API returns {data: {code: 200, account: {...}}}
+    const acc = d.data?.account || d.account;
+    if (acc && !d.data?.account) { d.data = d; } // normalize flat format
+    if (acc) {
       ncmLoggedIn = true;
-      ncmUser = d.data;
+      ncmUser = d.data || d;
       sectionNcm.style.display = '';
       renderNcmUser();
       await loadNcmPlaylists();
@@ -775,7 +778,7 @@ async function checkNcmStatus() {
       sectionNcm.style.display = '';
       renderNcmUser();
     }
-  } catch (e) { /* NCM API not running */ }
+  } catch (e) { console.error('NCM status check failed:', e); }
 }
 
 function renderNcmUser() {
