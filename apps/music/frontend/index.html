@@ -232,6 +232,21 @@ audio { display: none; }
 }
 @keyframes fadeUp { from { opacity: 0; transform: translateX(-50%) translateY(12px); } }
 
+/* ═══════════════════ Context Menu ═══════════════════ */
+.ctx-menu {
+  position: fixed; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+  border: 1px solid rgba(74,122,154,0.15); border-radius: 12px; padding: 4px 0;
+  min-width: 160px; z-index: 10001; display: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.ctx-menu .ctx-item {
+  padding: 8px 16px; font-size: 0.8rem; cursor: pointer;
+  transition: background 0.1s; color: var(--c-text);
+}
+.ctx-menu .ctx-item:hover { background: rgba(74,122,154,0.06); }
+.ctx-menu .ctx-item.danger { color: var(--c-warm); }
+.ctx-menu .ctx-sep { height: 1px; background: rgba(74,122,154,0.08); margin: 4px 10px; }
+
 /* ═══════════════════ 响应式 ═══════════════════ */
 @media (max-width: 768px) {
   .hero-inner h1 { font-size: 2rem; }
@@ -286,7 +301,7 @@ audio { display: none; }
           <ul class="playlist-list" id="localPlaylistNav">
             <li class="active" data-pl-id="" data-pl-name="全部歌曲">📁 全部歌曲 <span class="count" id="localCount">0</span></li>
           </ul>
-          <button class="ncm-login-btn" id="btnNewPlaylist" style="margin-top:8px;">＋ 新建歌单</button>
+          <button class="ncm-login-btn" id="btnNewPlaylist" style="margin-top:8px;border-color:rgba(74,122,154,0.3);color:var(--c-blue-dk);background:rgba(74,122,154,0.04);">＋ 新建歌单</button>
         </div>
         <div class="sidebar-section" id="sectionNcm" style="display:none;">
           <div class="sidebar-title">网易云音乐</div>
@@ -325,6 +340,18 @@ audio { display: none; }
     <p class="hint" id="qrHint">请用网易云音乐 App 扫码</p>
     <button class="modal-close" id="qrClose">取消</button>
   </div>
+</div>
+
+<!-- ═══════════════════ Context Menu ═══════════════════ -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" id="ctxAddToPlaylist" style="position:relative;">
+    ➕ 添加到歌单 ▸
+    <div class="ctx-sub" id="ctxSubPlaylist" style="display:none;position:absolute;left:100%;top:-4px;background:rgba(255,255,255,0.96);backdrop-filter:blur(20px);border:1px solid rgba(74,122,154,0.15);border-radius:12px;padding:4px 0;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,0.08);"></div>
+  </div>
+  <div class="ctx-item" id="ctxRemoveFromPlaylist" style="display:none;">🗑️ 从当前歌单移除</div>
+  <div class="ctx-sep" id="ctxSepPlaylist"></div>
+  <div class="ctx-item danger" id="ctxRenamePlaylist">✏️ 重命名歌单</div>
+  <div class="ctx-item danger" id="ctxDeletePlaylist">🗑️ 删除歌单</div>
 </div>
 
 <!-- ═══════════════════ Footer ═══════════════════ -->
@@ -378,10 +405,102 @@ const tabNetease = document.getElementById('tabNetease');
 const sectionNcm = document.getElementById('sectionNcm');
 
 let qrTimer = null;
+let ctxType = null;      // 'song' | 'playlist'
+let ctxTargetId = null;  // song id or playlist id
 
-// ═══════════════════════════════════════════════
-//  Helpers
-// ═══════════════════════════════════════════════
+const ctxMenu = document.getElementById('ctxMenu');
+const ctxAddToPlaylist = document.getElementById('ctxAddToPlaylist');
+const ctxRemoveFromPlaylist = document.getElementById('ctxRemoveFromPlaylist');
+const ctxSepPlaylist = document.getElementById('ctxSepPlaylist');
+const ctxRenamePlaylist = document.getElementById('ctxRenamePlaylist');
+const ctxDeletePlaylist = document.getElementById('ctxDeletePlaylist');
+
+const ctxSubPlaylist = document.getElementById('ctxSubPlaylist');
+
+function showCtxMenu(e, type, targetId) {
+  ctxType = type;
+  ctxTargetId = targetId;
+  const isSong = type === 'song';
+  const inPlaylist = currentPlaylistId !== null && isSong && currentSource === SOURCE.LOCAL;
+  ctxAddToPlaylist.style.display = isSong && playlists.length > 0 ? '' : 'none';
+  ctxRemoveFromPlaylist.style.display = inPlaylist ? '' : 'none';
+  ctxSepPlaylist.style.display = 'none';
+  ctxRenamePlaylist.style.display = 'none';
+  ctxDeletePlaylist.style.display = 'none';
+  ctxSubPlaylist.style.display = 'none';
+  // Build submenu for "add to playlist"
+  if (isSong && playlists.length > 0) {
+    ctxSubPlaylist.innerHTML = playlists.map(p =>
+      `<div class="ctx-item" data-pl-id="${p.id}">📋 ${esc(p.name)}</div>`
+    ).join('');
+    ctxSubPlaylist.querySelectorAll('.ctx-item').forEach(item => {
+      item.addEventListener('click', async () => {
+        hideCtxMenu();
+        const plId = parseInt(item.dataset.plId);
+        const r = await fetch(`/api/playlists/${plId}/songs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ song_id: ctxTargetId }) });
+        if (r.ok) { toast('✅ 已添加到 ' + (playlists.find(p=>p.id===plId)?.name||'歌单')); await loadPlaylists(); }
+        else toast('❌ 添加失败');
+      });
+    });
+  }
+  // Playlist context
+  if (type === 'playlist') {
+    ctxAddToPlaylist.style.display = 'none';
+    ctxRemoveFromPlaylist.style.display = 'none';
+    ctxSepPlaylist.style.display = '';
+    ctxRenamePlaylist.style.display = '';
+    ctxDeletePlaylist.style.display = '';
+  }
+  ctxMenu.style.display = 'block';
+  let left = e.clientX, top = e.clientY;
+  if (left + 170 > window.innerWidth) left -= 170;
+  if (top + ctxMenu.offsetHeight > window.innerHeight) top -= ctxMenu.offsetHeight;
+  ctxMenu.style.left = left + 'px';
+  ctxMenu.style.top = top + 'px';
+  e.preventDefault();
+}
+
+// Show submenu on hover over "添加到歌单"
+ctxAddToPlaylist.addEventListener('mouseenter', () => { ctxSubPlaylist.style.display = ''; });
+ctxAddToPlaylist.addEventListener('mouseleave', () => { ctxSubPlaylist.style.display = 'none'; });
+
+function hideCtxMenu() { ctxMenu.style.display = 'none'; ctxType = null; ctxTargetId = null; }
+document.addEventListener('click', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
+document.addEventListener('contextmenu', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
+
+// Context menu actions
+ctxRemoveFromPlaylist.addEventListener('click', async () => {
+  hideCtxMenu();
+  if (!ctxTargetId || !currentPlaylistId) return;
+  const r = await fetch(`/api/playlists/${currentPlaylistId}/songs/${ctxTargetId}`, { method: 'DELETE' });
+  if (r.ok) { toast('✅ 已移除'); await loadPlaylists(); renderSongList(); }
+  else toast('❌ 移除失败');
+});
+
+ctxRenamePlaylist.addEventListener('click', async () => {
+  hideCtxMenu();
+  if (!ctxTargetId) return;
+  const pl = playlists.find(p => p.id === ctxTargetId);
+  const name = prompt('新名称：', pl?.name || '');
+  if (!name?.trim()) return;
+  const r = await fetch(`/api/playlists/${ctxTargetId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim() }) });
+  if (r.ok) { toast('✅ 已重命名'); await loadPlaylists(); }
+  else toast('❌ 重命名失败');
+});
+
+ctxDeletePlaylist.addEventListener('click', async () => {
+  hideCtxMenu();
+  if (!ctxTargetId) return;
+  const pl = playlists.find(p => p.id === ctxTargetId);
+  if (!confirm(`确定删除歌单「${pl?.name}」？\n歌曲不会被删除。`)) return;
+  const r = await fetch(`/api/playlists/${ctxTargetId}`, { method: 'DELETE' });
+  if (r.ok) {
+    toast('✅ 已删除');
+    if (currentPlaylistId === ctxTargetId) { currentPlaylistId = null; switchSource(SOURCE.LOCAL); }
+    await loadPlaylists();
+    renderSongList();
+  } else toast('❌ 删除失败');
+});
 function fmtDur(s) {
   if (!s || s <= 0) return '';
   const m = Math.floor(s / 60), sec = Math.floor(s % 60);
@@ -562,6 +681,10 @@ function updateLocalPlaylistNav() {
       switchSource(SOURCE.LOCAL);
       updateLocalPlaylistNav();
       renderSongList();
+    });
+    li.addEventListener('contextmenu', e => {
+      e.stopPropagation();
+      showCtxMenu(e, 'playlist', pl.id);
     });
     localPlaylistNav.appendChild(li);
   });
@@ -770,6 +893,11 @@ function bindSongClicks() {
         const s = ncmTracks.find(x => x.id == id);
         if (s) playTrack(s, SOURCE.NETEASE);
       }
+    });
+    li.addEventListener('contextmenu', e => {
+      const id = li.dataset.id;
+      const src = li.dataset.src === 'netease' ? SOURCE.NETEASE : SOURCE.LOCAL;
+      if (src === SOURCE.LOCAL) showCtxMenu(e, 'song', parseInt(id));
     });
   });
 }
