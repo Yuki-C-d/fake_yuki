@@ -86,6 +86,10 @@ class NCMClient:
         r = await self.client.get("/song/detail", params={"ids": song_id})
         return r.json()
 
+    async def get_likelist(self, uid: str) -> dict:
+        r = await self.client.get("/likelist", params={"uid": uid})
+        return r.json()
+
     async def get_lyric(self, song_id: str) -> dict:
         r = await self.client.get("/lyric", params={"id": song_id})
         return r.json()
