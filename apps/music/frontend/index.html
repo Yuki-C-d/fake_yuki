@@ -908,6 +908,7 @@ function renderNcmTracks() {
       <span class="info"><strong>${esc(s.title)}</strong><small>${esc(s.artist||'')}</small></span>
       <span class="tag ncm">网易云</span>
       <span class="dur">${fmtDur(s.duration)}</span>
+      <span class="tag ncm" style="cursor:pointer;margin-left:4px;" onclick="event.stopPropagation();showCollectMenu(event,${s.id})" title="收藏到歌单">＋</span>
     </li>`;
   }).join('');
   bindSongClicks();
@@ -992,10 +993,62 @@ document.getElementById('btnNewPlaylist').addEventListener('click', async () => 
 });
 
 // Search
+var searchTimer = null;
 searchInput.addEventListener('input', () => {
-  if (currentSource === SOURCE.LOCAL) renderSongList();
-  else renderNcmTracks();
+  if (currentSource === SOURCE.LOCAL) { renderSongList(); return; }
+  // NCM mode: debounce search via API
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(doNcmSearch, 400);
 });
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && currentSource === SOURCE.NETEASE) { clearTimeout(searchTimer); doNcmSearch(); }
+});
+
+async function doNcmSearch() {
+  var q = searchInput.value.trim();
+  if (!q) { renderNcmTracks(); return; }
+  try {
+    var r = await fetch('/api/ncm/search?keywords=' + encodeURIComponent(q));
+    var d = await r.json();
+    var songs = (d.result?.songs || []).map(function(s){
+      return {id:s.id,name:s.name,ar:s.ar||[],al:s.al||{},dt:s.dt||0};
+    });
+    ncmTracks = songs;
+    renderNcmTracks();
+  } catch(e) {}
+}
+
+// NCM collect: add song to NCM playlist
+var collectSongId = null;
+function showCollectMenu(e, songId) {
+  e.stopPropagation();
+  collectSongId = songId;
+  ctxAddToPlaylist.style.display = 'none';
+  ctxRemoveFromPlaylist.style.display = 'none';
+  ctxSepPlaylist.style.display = '';
+  ctxRenamePlaylist.style.display = 'none';
+  ctxDeletePlaylist.style.display = 'none';
+  // Build NCM playlist choices
+  ctxSubPlaylist.style.display = '';
+  ctxSubPlaylist.innerHTML = ncmPlaylists.map(function(p){
+    return '<div class=\"ctx-item\" data-pl-id=\"' + p.id + '\">🎶 ' + esc(p.name) + '</div>';
+  }).join('') || '<div class=\"ctx-item\" style=\"color:var(--c-text-lt);\">暂无歌单</div>';
+  ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(function(item){
+    item.addEventListener('click', async function(){
+      var pid = item.dataset.plId;
+      hideCtxMenu();
+      try {
+        var r = await fetch('/api/ncm/playlist/' + pid + '/add', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tracks:String(collectSongId)})});
+        if (r.ok) toast('✅ 已收藏到歌单');
+        else toast('❌ 收藏失败');
+      } catch(e2){ toast('❌ 收藏失败'); }
+    });
+  });
+  ctxMenu.style.visibility = 'hidden'; ctxMenu.style.display = 'block';
+  ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+  ctxMenu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
+  ctxMenu.style.visibility = '';
+}
 
 // ═══════════════════════════════════════════════
 //  Init
