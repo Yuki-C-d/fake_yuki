@@ -930,7 +930,9 @@ function bindSongClicks() {
     li.addEventListener('contextmenu', e => {
       const id = li.dataset.id;
       const src = li.dataset.src === 'netease' ? SOURCE.NETEASE : SOURCE.LOCAL;
-      if (src === SOURCE.LOCAL) showCtxMenu(e, 'song', parseInt(id));
+      if (src === SOURCE.LOCAL) { showCtxMenu(e, 'song', parseInt(id)); return; }
+      // NCM song: show collect menu
+      showCollectMenu(e, id);
     });
   });
 }
@@ -1012,20 +1014,43 @@ searchInput.addEventListener('keydown', e => {
 async function doNcmSearch() {
   var q = searchInput.value.trim();
   if (!q) { renderNcmTracks(); return; }
+  var ncmResults = [];
   try {
     var r = await fetch('/api/ncm/search?keywords=' + encodeURIComponent(q));
     var d = await r.json();
-    ncmTracks = (d.result?.songs || []).map(function(s){
-      return {
-        id: s.id,
-        title: s.name,
-        artist: (s.ar||[]).map(function(a){return a.name;}).join(' / '),
-        album: (s.al||{}).name || '',
-        duration: (s.dt||0) / 1000
-      };
+    ncmResults = (d.result?.songs || []).map(function(s){
+      return {id:s.id,title:s.name,artist:(s.ar||[]).map(function(a){return a.name;}).join(' / '),album:(s.al||{}).name||'',duration:(s.dt||0)/1000,source:'netease'};
     });
-    renderNcmTracks();
   } catch(e) {}
+  // Also include matching local songs at top
+  var kw = q.toLowerCase();
+  var localResults = songs.filter(function(s){
+    return (s.title + s.artist + (s.album||'')).toLowerCase().includes(kw);
+  });
+  ncmTracks = ncmResults; // preserve for play queue
+  var html = '';
+  if (!localResults.length && !ncmResults.length) {
+    html = '<li class="empty">🔍 没有匹配的歌曲</li>';
+  } else {
+    localResults.forEach(function(s,i){
+      var active = s.id === currentTrackId && currentTrackSource === SOURCE.LOCAL;
+      html += '<li class="'+(active?'active':'')+'" data-id="'+s.id+'" data-src="local">'+
+        '<span class="idx">'+(active?'▶':i+1)+'</span>'+
+        '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
+        '<span class="tag local">本地</span><span class="dur">'+fmtDur(s.duration)+'</span></li>';
+    });
+    ncmResults.forEach(function(s,i){
+      var active = s.id == currentTrackId && currentTrackSource === SOURCE.NETEASE;
+      html += '<li class="'+(active?'active':'')+'" data-id="'+s.id+'" data-src="netease">'+
+        '<span class="idx">'+(active?'▶':localResults.length+i+1)+'</span>'+
+        '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
+        '<span class="tag ncm">网易云</span>'+
+        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showCollectMenu(event,'+s.id+')" title="收藏到歌单">＋</span>'+
+        '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
+    });
+  }
+  songList.innerHTML = html;
+  bindSongClicks();
 }
 
 // Unified search: local first, then NCM
