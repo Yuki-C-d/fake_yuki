@@ -90,11 +90,12 @@ class NCMClient:
         r = await self.client.get("/likelist", params={"uid": uid})
         return r.json()
 
-    async def playlist_track_add(self, pid: str, ids: str, op: str = "add") -> dict:
-        """添加/移除歌曲 op=add|del, pid=歌单id, ids=歌曲id(逗号分隔)"""
+    async def playlist_track_add(self, pid: str, track_ids: str, op: str = "add") -> dict:
+        """添加/移除歌曲 — 调用 playlist/manipulate/tracks（更可靠）
+        op=add|del, pid=歌单id, track_ids=歌曲id(逗号分隔)"""
         r = await self.client.get(
-            "/playlist/track/add",
-            params={"op": op, "pid": pid, "ids": ids},
+            "/playlist/tracks",
+            params={"op": op, "pid": pid, "tracks": track_ids},
         )
         return r.json()
 
