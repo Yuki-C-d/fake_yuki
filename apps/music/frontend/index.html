@@ -779,7 +779,12 @@ async function checkNcmStatus() {
       sectionNcm.style.display = '';
       renderNcmUser();
     }
-  } catch (e) { console.error('NCM status check failed:', e); }
+  } catch (e) {
+    console.error('NCM status check failed:', e);
+    ncmLoggedIn = false;
+    sectionNcm.style.display = '';
+    renderNcmUser();
+  }
 }
 
 function renderNcmUser() {
