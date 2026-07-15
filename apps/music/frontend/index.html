@@ -743,6 +743,7 @@ function renderSongList() {
         <span class="info"><strong>${esc(s.title)}</strong><small>${esc(s.artist||'')}</small></span>
         <span class="tag local">本地</span>
         <span class="dur">${fmtDur(s.duration)}</span>
+        <span class="tag local" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,${s.id},'local')" title="添加到歌单">＋</span>
       </li>`;
     }).join('');
   }
@@ -908,7 +909,7 @@ function renderNcmTracks() {
       <span class="info"><strong>${esc(s.title)}</strong><small>${esc(s.artist||'')}</small></span>
       <span class="tag ncm">网易云</span>
       <span class="dur">${fmtDur(s.duration)}</span>
-      <span class="tag ncm" style="cursor:pointer;margin-left:4px;" onclick="event.stopPropagation();showCollectMenu(event,${s.id})" title="收藏到歌单">＋</span>
+      <span class="tag ncm" style="cursor:pointer;margin-left:4px;" onclick="event.stopPropagation();showAddMenu(event,${s.id},'netease')" title="收藏到歌单">＋</span>
     </li>`;
   }).join('');
   bindSongClicks();
@@ -927,13 +928,7 @@ function bindSongClicks() {
         if (s) playTrack(s, SOURCE.NETEASE);
       }
     });
-    li.addEventListener('contextmenu', e => {
-      const id = li.dataset.id;
-      const src = li.dataset.src === 'netease' ? SOURCE.NETEASE : SOURCE.LOCAL;
-      if (src === SOURCE.LOCAL) { showCtxMenu(e, 'song', parseInt(id)); return; }
-      // NCM song: show collect menu
-      showCollectMenu(e, id);
-    });
+    // Right-click disabled — use [+] buttons instead
   });
 }
 
@@ -1045,7 +1040,7 @@ async function doNcmSearch() {
         '<span class="idx">'+(active?'▶':localResults.length+i+1)+'</span>'+
         '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
         '<span class="tag ncm">网易云</span>'+
-        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showCollectMenu(event,'+s.id+')" title="收藏到歌单">＋</span>'+
+        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+','netease')" title="收藏到歌单">＋</span>'+
         '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
     });
   }
@@ -1097,7 +1092,8 @@ async function doUnifiedSearch() {
         '<span class="idx">'+(active?'▶':i+1)+'</span>'+
         '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
         '<span class="tag local">本地</span>'+
-        '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
+        '<span class="dur">'+fmtDur(s.duration)+'</span>'+
+        '<span class="tag local" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+',\'local\')" title="添加到歌单">＋</span></li>';
     });
     ncmResults.forEach(function(s,i){
       var active = s.id == currentTrackId && currentTrackSource === SOURCE.NETEASE;
@@ -1105,7 +1101,7 @@ async function doUnifiedSearch() {
         '<span class="idx">'+(active?'▶':localResults.length+i+1)+'</span>'+
         '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
         '<span class="tag ncm">网易云</span>'+
-        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showCollectMenu(event,'+s.id+')" title="收藏到歌单">＋</span>'+
+        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+','netease')" title="收藏到歌单">＋</span>'+
         '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
     });
   }
@@ -1113,32 +1109,49 @@ async function doUnifiedSearch() {
   bindSongClicks();
 }
 
-// NCM collect: add song to NCM playlist
-var collectSongId = null;
-function showCollectMenu(e, songId) {
+// Unified [+] button: show add-to-playlist popup
+var addTargetId = null, addTargetSrc = null;
+function showAddMenu(e, songId, source) {
   e.stopPropagation();
-  collectSongId = songId;
+  addTargetId = songId; addTargetSrc = source;
   ctxAddToPlaylist.style.display = 'none';
   ctxRemoveFromPlaylist.style.display = 'none';
   ctxSepPlaylist.style.display = '';
   ctxRenamePlaylist.style.display = 'none';
   ctxDeletePlaylist.style.display = 'none';
-  // Build NCM playlist choices
   ctxSubPlaylist.style.display = '';
-  ctxSubPlaylist.innerHTML = ncmPlaylists.map(function(p){
-    return '<div class=\"ctx-item\" data-pl-id=\"' + p.id + '\">🎶 ' + esc(p.name) + '</div>';
-  }).join('') || '<div class=\"ctx-item\" style=\"color:var(--c-text-lt);\">暂无歌单</div>';
-  ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(function(item){
-    item.addEventListener('click', async function(){
-      var pid = item.dataset.plId;
-      hideCtxMenu();
-      try {
-        var r = await fetch('/api/ncm/playlist/' + pid + '/add', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tracks:String(collectSongId)})});
-        if (r.ok) toast('✅ 已收藏到歌单');
-        else toast('❌ 收藏失败');
-      } catch(e2){ toast('❌ 收藏失败'); }
+  if (source === 'netease') {
+    // NCM playlists
+    ctxSubPlaylist.innerHTML = ncmPlaylists.map(function(p){
+      return '<div class=\"ctx-item\" data-pl-id=\"' + p.id + '\">🎶 ' + esc(p.name) + '</div>';
+    }).join('') || '<div class=\"ctx-item\" style=\"color:var(--c-text-lt);\">暂无歌单</div>';
+    ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(function(item){
+      item.addEventListener('click', async function(){
+        var pid = item.dataset.plId; hideCtxMenu();
+        var r = await fetch('/api/ncm/playlist/' + pid + '/add', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tracks:String(addTargetId)})});
+        if (r.ok) toast('✅ 已收藏'); else toast('❌ 失败');
+      });
     });
-  });
+  } else {
+    // Local playlists
+    ctxSubPlaylist.innerHTML = playlists.map(function(p){
+      return '<div class=\"ctx-item\" data-pl-id=\"' + p.id + '\">📋 ' + esc(p.name) + '</div>';
+    }).join('') + (playlists.length === 0 ? '<div class=\"ctx-item\" style=\"color:var(--c-text-lt);\">暂无歌单</div>' : '') +
+    '<div class=\"ctx-item\" id=\"ctxSubNew\" style=\"border-top:1px solid rgba(74,122,154,0.08);\">＋ 新建歌单</div>';
+    ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(function(item){
+      item.addEventListener('click', async function(){
+        var plId = parseInt(item.dataset.plId); hideCtxMenu();
+        var r = await fetch('/api/playlists/' + plId + '/songs', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({song_id:addTargetId})});
+        if (r.ok) { toast('✅ 已添加'); loadPlaylists(); } else toast('❌ 失败');
+      });
+    });
+    var newBtn = ctxSubPlaylist.querySelector('#ctxSubNew');
+    if (newBtn) newBtn.addEventListener('click', async function(){
+      hideCtxMenu(); var name = prompt('歌单名称：'); if (!name?.trim()) return;
+      await fetch('/api/playlists', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.trim()})});
+      toast('✅ 已创建'); loadPlaylists();
+    });
+  }
   ctxMenu.style.visibility = 'hidden'; ctxMenu.style.display = 'block';
   ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
   ctxMenu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
