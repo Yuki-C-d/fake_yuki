@@ -907,14 +907,12 @@ function renderNcmTracks() {
   }
   songList.innerHTML = ncmTracks.map((s, i) => {
     const active = s.id == currentTrackId && currentTrackSource === SOURCE.NETEASE;
-    var ncmRmBtn = ncmPlaylistId ? '<span class=\"tag ncm\" style=\"cursor:pointer;margin-left:2px;color:var(--c-warm);\" onclick=\"event.stopPropagation();removeFromNcmPlaylist(' + s.id + ')\" title=\"从歌单移除\">✕</span>' : '';
     return `<li class="${active?'active':''}" data-id="${s.id}" data-src="netease">
       <span class="idx">${active ? '▶' : i+1}</span>
       <span class="info"><strong>${esc(s.title)}</strong><small>${esc(s.artist||'')}</small></span>
       <span class="tag ncm">网易云</span>
       <span class="dur">${fmtDur(s.duration)}</span>
       <span class="tag ncm" style="cursor:pointer;margin-left:4px;" onclick="event.stopPropagation();showAddMenu(event,${s.id},'netease')" title="收藏到歌单">＋</span>
-      ${ncmRmBtn}
     </li>`;
   }).join('');
   bindSongClicks();
@@ -935,16 +933,6 @@ function bindSongClicks() {
     });
     // Right-click disabled — use [+] buttons instead
   });
-}
-
-async function removeFromNcmPlaylist(songId) {
-  if (!ncmPlaylistId) return;
-  try {
-    var r = await fetch('/api/ncm/playlist/' + ncmPlaylistId + '/del', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:String(songId)})});
-    var d = await r.json();
-    if (r.ok && d.code === 200) { toast('✅ 已移除'); loadNcmTracks(ncmPlaylistId); }
-    else toast('❌ ' + ((d||{}).message || d.msg || '移除失败'));
-  } catch(e) { toast('❌ 移除失败'); }
 }
 
 async function removeFromCurrentPlaylist(songId) {
