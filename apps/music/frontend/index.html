@@ -1045,7 +1045,7 @@ async function doNcmSearch() {
         '<span class="idx">'+(active?'▶':localResults.length+i+1)+'</span>'+
         '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
         '<span class="tag ncm">网易云</span>'+
-        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+','netease')" title="收藏到歌单">＋</span>'+
+        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+',&quot;netease&quot;)" title="收藏到歌单">＋</span>'+
         '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
     });
   }
@@ -1106,7 +1106,7 @@ async function doUnifiedSearch() {
         '<span class="idx">'+(active?'▶':localResults.length+i+1)+'</span>'+
         '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
         '<span class="tag ncm">网易云</span>'+
-        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+','netease')" title="收藏到歌单">＋</span>'+
+        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,'+s.id+',&quot;netease&quot;)" title="收藏到歌单">＋</span>'+
         '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
     });
   }
