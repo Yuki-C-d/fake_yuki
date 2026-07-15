@@ -616,10 +616,18 @@ async def ncm_likelist(uid: str):
 
 @app.post("/api/ncm/playlist/{pid}/add")
 async def ncm_playlist_add(pid: str, body: dict):
-    ids = body.get("ids", "") or body.get("tracks", "")  # compat
+    ids = body.get("ids", "") or body.get("tracks", "")
     if not ids:
         raise HTTPException(400, "缺少 ids")
     return await get_ncm().playlist_track_add(pid, ids)
+
+
+@app.post("/api/ncm/playlist/{pid}/del")
+async def ncm_playlist_del(pid: str, body: dict):
+    ids = body.get("ids", "") or body.get("tracks", "")
+    if not ids:
+        raise HTTPException(400, "缺少 ids")
+    return await get_ncm().playlist_track_add(pid, ids, op="del")
 
 
 @app.get("/api/ncm/song/{song_id}/lyric")
