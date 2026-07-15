@@ -995,13 +995,18 @@ document.getElementById('btnNewPlaylist').addEventListener('click', async () => 
 // Search
 var searchTimer = null;
 searchInput.addEventListener('input', () => {
-  if (currentSource === SOURCE.LOCAL) { renderSongList(); return; }
-  // NCM mode: debounce search via API
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(doNcmSearch, 400);
+  if (currentSource === SOURCE.NETEASE) {
+    searchTimer = setTimeout(doNcmSearch, 400);
+  } else {
+    searchTimer = setTimeout(doUnifiedSearch, 200);
+  }
 });
 searchInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && currentSource === SOURCE.NETEASE) { clearTimeout(searchTimer); doNcmSearch(); }
+  if (e.key === 'Enter') {
+    clearTimeout(searchTimer);
+    currentSource === SOURCE.NETEASE ? doNcmSearch() : doUnifiedSearch();
+  }
 });
 
 async function doNcmSearch() {
@@ -1010,12 +1015,77 @@ async function doNcmSearch() {
   try {
     var r = await fetch('/api/ncm/search?keywords=' + encodeURIComponent(q));
     var d = await r.json();
-    var songs = (d.result?.songs || []).map(function(s){
-      return {id:s.id,name:s.name,ar:s.ar||[],al:s.al||{},dt:s.dt||0};
+    ncmTracks = (d.result?.songs || []).map(function(s){
+      return {
+        id: s.id,
+        title: s.name,
+        artist: (s.ar||[]).map(function(a){return a.name;}).join(' / '),
+        album: (s.al||{}).name || '',
+        duration: (s.dt||0) / 1000
+      };
     });
-    ncmTracks = songs;
     renderNcmTracks();
   } catch(e) {}
+}
+
+// Unified search: local first, then NCM
+async function doUnifiedSearch() {
+  var q = searchInput.value.trim();
+  // 1. Local filter
+  var localResults = [];
+  if (q) {
+    var kw = q.toLowerCase();
+    localResults = songs.filter(function(s){
+      return (s.title + s.artist + (s.album||'')).toLowerCase().includes(kw);
+    });
+  } else {
+    localResults = currentPlaylistId !== null
+      ? songs.filter(function(s){ return (playlistSongIds.get(currentPlaylistId)||new Set()).has(s.id); })
+      : songs.slice();
+  }
+  // 2. NCM search (if logged in and has query)
+  var ncmResults = [];
+  if (q && ncmLoggedIn) {
+    try {
+      var r = await fetch('/api/ncm/search?keywords=' + encodeURIComponent(q) + '&limit=10');
+      var d = await r.json();
+      ncmResults = (d.result?.songs || []).map(function(s){
+        return {
+          id: s.id,
+          title: s.name,
+          artist: (s.ar||[]).map(function(a){return a.name;}).join(' / '),
+          album: (s.al||{}).name || '',
+          duration: (s.dt||0) / 1000,
+          source: 'netease'
+        };
+      });
+    } catch(e) {}
+  }
+  // 3. Render unified list
+  var html = '';
+  if (!localResults.length && !ncmResults.length) {
+    html = '<li class="empty">🔍 没有匹配的歌曲</li>';
+  } else {
+    localResults.forEach(function(s,i){
+      var active = s.id === currentTrackId && currentTrackSource === SOURCE.LOCAL;
+      html += '<li class="'+(active?'active':'')+'" data-id="'+s.id+'" data-src="local">'+
+        '<span class="idx">'+(active?'▶':i+1)+'</span>'+
+        '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
+        '<span class="tag local">本地</span>'+
+        '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
+    });
+    ncmResults.forEach(function(s,i){
+      var active = s.id == currentTrackId && currentTrackSource === SOURCE.NETEASE;
+      html += '<li class="'+(active?'active':'')+'" data-id="'+s.id+'" data-src="netease">'+
+        '<span class="idx">'+(active?'▶':localResults.length+i+1)+'</span>'+
+        '<span class="info"><strong>'+esc(s.title)+'</strong><small>'+esc(s.artist||'')+'</small></span>'+
+        '<span class="tag ncm">网易云</span>'+
+        '<span class="tag ncm" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showCollectMenu(event,'+s.id+')" title="收藏到歌单">＋</span>'+
+        '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
+    });
+  }
+  songList.innerHTML = html;
+  bindSongClicks();
 }
 
 // NCM collect: add song to NCM playlist
