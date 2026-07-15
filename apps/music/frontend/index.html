@@ -738,12 +738,17 @@ function renderSongList() {
   } else {
     songList.innerHTML = filtered.map((s, i) => {
       const active = s.id === currentTrackId && currentTrackSource === SOURCE.LOCAL;
+      var rmBtn = '';
+      if (currentPlaylistId !== null) {
+        rmBtn = '<span class="tag local" style="cursor:pointer;margin-left:2px;color:var(--c-warm);" onclick="event.stopPropagation();removeFromCurrentPlaylist(' + s.id + ')" title="从歌单移除">✕</span>';
+      }
       return `<li class="${active?'active':''}" data-id="${s.id}" data-src="local">
         <span class="idx">${active ? '▶' : i+1}</span>
         <span class="info"><strong>${esc(s.title)}</strong><small>${esc(s.artist||'')}</small></span>
         <span class="tag local">本地</span>
         <span class="dur">${fmtDur(s.duration)}</span>
         <span class="tag local" style="cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();showAddMenu(event,${s.id},'local')" title="添加到歌单">＋</span>
+        ${rmBtn}
       </li>`;
     }).join('');
   }
@@ -935,6 +940,13 @@ function bindSongClicks() {
     });
     // Right-click disabled — use [+] buttons instead
   });
+}
+
+async function removeFromCurrentPlaylist(songId) {
+  if (!currentPlaylistId) return;
+  var r = await fetch('/api/playlists/' + currentPlaylistId + '/songs/' + songId, { method: 'DELETE' });
+  if (r.ok) { toast('✅ 已移除'); await loadPlaylists(); renderSongList(); }
+  else toast('❌ 移除失败');
 }
 
 // ═══════════════════════════════════════════════
@@ -1129,7 +1141,7 @@ function showAddMenu(e, songId, source) {
       div.textContent = '🎶 ' + (p.name || '');
       if (p.id) div.addEventListener('click', async function(){
         hideCtxMenu();
-        var r = await fetch('/api/ncm/playlist/' + p.id + '/add', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tracks:String(addTargetId)})});
+        var r = await fetch('/api/ncm/playlist/' + p.id + '/add', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:String(addTargetId)})});
         if (r.ok) toast('✅ 已收藏'); else toast('❌ 失败');
       });
       ctxMenu.appendChild(div);

@@ -616,10 +616,10 @@ async def ncm_likelist(uid: str):
 
 @app.post("/api/ncm/playlist/{pid}/add")
 async def ncm_playlist_add(pid: str, body: dict):
-    track_ids = body.get("tracks", "")
-    if not track_ids:
-        raise HTTPException(400, "缺少 tracks")
-    return await get_ncm().playlist_track_add(pid, track_ids)
+    ids = body.get("ids", "") or body.get("tracks", "")  # compat
+    if not ids:
+        raise HTTPException(400, "缺少 ids")
+    return await get_ncm().playlist_track_add(pid, ids)
 
 
 @app.get("/api/ncm/song/{song_id}/lyric")
