@@ -418,65 +418,60 @@ const ctxDeletePlaylist = document.getElementById('ctxDeletePlaylist');
 const ctxSubPlaylist = document.getElementById('ctxSubPlaylist');
 
 function showCtxMenu(e, type, targetId) {
-  ctxType = type;
-  ctxTargetId = targetId;
-  const isSong = type === 'song';
-  const inPlaylist = currentPlaylistId !== null && isSong && currentSource === SOURCE.LOCAL;
-  ctxAddToPlaylist.style.display = isSong ? '' : 'none';
-  ctxRemoveFromPlaylist.style.display = inPlaylist ? '' : 'none';
-  ctxSepPlaylist.style.display = 'none';
-  ctxRenamePlaylist.style.display = 'none';
-  ctxDeletePlaylist.style.display = 'none';
-  ctxSubPlaylist.style.display = 'none';
-  // Build submenu for "add to playlist"
-  if (isSong) {
-    var plItems = playlists.map(p =>
-      `<div class="ctx-item" data-pl-id="${p.id}">📋 ${esc(p.name)}</div>`
-    ).join('');
-    ctxSubPlaylist.innerHTML = (playlists.length > 0 ? plItems : `<div class="ctx-item" style="color:var(--c-text-lt);">暂无歌单</div>`) +
-    `<div class="ctx-item" id="ctxSubNewPlaylist" style="border-top:1px solid rgba(74,122,154,0.08);">＋ 新建歌单</div>`;
-    // "新建歌单" entry
-    const newPlBtn = ctxSubPlaylist.querySelector('#ctxSubNewPlaylist');
-    if (newPlBtn) newPlBtn.addEventListener('click', async () => {
+  e.preventDefault(); e.stopPropagation();
+  ctxTargetId = targetId; ctxType = type;
+  hideCtxMenu();
+  ctxMenu.innerHTML = '';
+  if (type === 'playlist') {
+    var pl = playlists.find(function(p){return p.id === targetId;});
+    // Rename
+    var rn = document.createElement('div'); rn.className = 'ctx-item'; rn.textContent = '✏️ 重命名';
+    rn.addEventListener('click', function(){
+      var name = prompt('新名称：', (pl||{}).name || '');
+      if (!name || !name.trim()) return;
       hideCtxMenu();
-      const name = prompt('歌单名称：');
-      if (!name?.trim()) return;
-      await fetch('/api/playlists', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim() }) });
-      toast('✅ 已创建');
-      await loadPlaylists();
-    });
-    ctxSubPlaylist.querySelectorAll('.ctx-item[data-pl-id]').forEach(item => {
-      item.addEventListener('click', async () => {
-        const sid = ctxTargetId;
-        const plId = parseInt(item.dataset.plId);
-        hideCtxMenu();
-        if (!sid || !plId) return;
-        const r = await fetch('/api/playlists/' + plId + '/songs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ song_id: sid }) });
-        if (r.ok) { toast('✅ 已添加到 ' + (playlists.find(p=>p.id===plId)?.name||'歌单')); await loadPlaylists(); }
-        else toast('❌ 添加失败');
+      fetch('/api/playlists/' + targetId, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.trim()})}).then(function(r){
+        if (r.ok) { toast('✅ 已重命名'); loadPlaylists(); } else toast('❌ 失败');
       });
     });
+    ctxMenu.appendChild(rn);
+    // Delete
+    var dl = document.createElement('div'); dl.className = 'ctx-item'; dl.style.color = 'var(--c-warm)'; dl.textContent = '🗑️ 删除歌单';
+    dl.addEventListener('click', function(){
+      if (!confirm('确定删除歌单「' + ((pl||{}).name||'') + '」？')) return;
+      hideCtxMenu();
+      fetch('/api/playlists/' + targetId, {method:'DELETE'}).then(function(r){
+        if (r.ok) {
+          toast('✅ 已删除');
+          if (currentPlaylistId === targetId) { currentPlaylistId = null; switchSource(SOURCE.LOCAL); }
+          loadPlaylists(); renderSongList();
+        } else toast('❌ 失败');
+      });
+    });
+    ctxMenu.appendChild(dl);
+  } else {
+    // Song: show add-to-playlist menu
+    playlists.forEach(function(p){
+      var div = document.createElement('div'); div.className = 'ctx-item'; div.textContent = '📋 ' + p.name;
+      div.addEventListener('click', function(){
+        hideCtxMenu();
+        fetch('/api/playlists/' + p.id + '/songs', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({song_id:targetId})}).then(function(r){
+          if (r.ok) { toast('✅ 已添加'); loadPlaylists(); } else toast('❌ 失败');
+        });
+      });
+      ctxMenu.appendChild(div);
+    });
+    var nd = document.createElement('div'); nd.className = 'ctx-item'; nd.textContent = '＋ 新建歌单';
+    nd.style.borderTop = '1px solid rgba(74,122,154,0.1)';
+    nd.addEventListener('click', function(){
+      hideCtxMenu(); var name = prompt('歌单名称：'); if (!name || !name.trim()) return;
+      fetch('/api/playlists', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.trim()})}).then(function(){ toast('✅ 已创建'); loadPlaylists(); });
+    });
+    ctxMenu.appendChild(nd);
   }
-  // Playlist context
-  if (type === 'playlist') {
-    ctxAddToPlaylist.style.display = 'none';
-    ctxRemoveFromPlaylist.style.display = 'none';
-    ctxSepPlaylist.style.display = '';
-    ctxRenamePlaylist.style.display = '';
-    ctxDeletePlaylist.style.display = '';
-  }
-  ctxMenu.style.visibility = 'hidden';
   ctxMenu.style.display = 'block';
-  let left = e.clientX, top = e.clientY;
-  if (left + 170 > window.innerWidth) left -= 170;
-  // force layout calc
-  void ctxMenu.offsetHeight;
-  if (top + ctxMenu.offsetHeight > window.innerHeight) top -= ctxMenu.offsetHeight;
-  ctxMenu.style.left = left + 'px';
-  ctxMenu.style.top = Math.max(0, top) + 'px';
-  ctxMenu.style.visibility = '';
-  e.preventDefault();
-  e.stopPropagation();
+  ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
+  ctxMenu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
 }
 
 // Toggle submenu on click (avoids hover issues on mobile/touch)
@@ -488,10 +483,8 @@ ctxAddToPlaylist.addEventListener('click', e => {
 
 function hideCtxMenu() { ctxMenu.style.display = 'none'; ctxType = null; ctxTargetId = null; }
 document.addEventListener('click', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
-// Let song/playlist handlers show menu first, then check
-document.addEventListener('contextmenu', e => {
-  setTimeout(() => { if (ctxMenu.style.display === 'block' && !ctxMenu.contains(e.target)) hideCtxMenu(); }, 0);
-});
+// Global: close context menu on click outside
+document.addEventListener('click', e => { if (!ctxMenu.contains(e.target)) hideCtxMenu(); });
 
 // Context menu actions
 ctxRemoveFromPlaylist.addEventListener('click', async () => {
