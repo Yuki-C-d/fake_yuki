@@ -89,16 +89,21 @@ body::before {
 /* ═══════════════════ 播放器 ═══════════════════ */
 /* Floating bottom progress bar */
 .bottom-bar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9998;
+  position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 9998;
+  width: 50%; max-width: 520px;
   background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.6);
-  padding: var(--sp2) var(--sp4);
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+  border: 1px solid rgba(255,255,255,0.5); border-radius: 16px;
+  padding: 10px var(--sp3) var(--sp2);
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.05);
 }
 .bottom-bar .track-name {
-  font-size: 0.8rem; font-weight: 600; color: var(--c-blue-dk);
+  font-size: 0.78rem; font-weight: 600; color: var(--c-blue-dk);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  margin-bottom: var(--sp);
+  margin-bottom: 6px; text-align: center;
+}
+.progress-rail {
+  flex: 1; height: 4px; background: rgba(196,223,240,0.5); border-radius: 2px;
+  cursor: pointer; position: relative;
 }
 .progress-wrap { display: flex; align-items: center; gap: var(--sp); }
 .progress-wrap .time { font-size: 0.7rem; color: var(--c-text-lt); min-width: 34px; }
