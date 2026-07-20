@@ -1,6 +1,6 @@
 # ☁️ fake_yuki 服务器文档
 
-> 最后更新: 2026-07-16
+> 最后更新: 2026-07-20
 
 ---
 
@@ -103,12 +103,7 @@ pkill -f openclaw-node
     ▼
 8.166.119.185:8080 (阿里云 ECS)
     │
-    ▼ frps (systemd 开机自启)
-    │
-    ▼ frpc (你电脑，开机自启)
-    │
-    ▼
-localhost:8080 (FastAPI 音乐站)
+    ▼ FastAPI 直跑 (systemd: fake-yuki-music)
 ```
 
 ### frps 配置（服务器端）
@@ -128,7 +123,7 @@ localhost:8080 (FastAPI 音乐站)
 
 | 名称 | 类型 | 本地端口 | 远程端口 | 用途 |
 |------|------|----------|----------|------|
-| music-vault | TCP | 8080 | 8080 | 音乐站 |
+| music-vault | TCP | 8080 | 8080 | 音乐站（已停用，ECS 直跑） |
 | gw-ws | TCP | 18789 | 18790 | OpenClaw Gateway ↔ ECS Node |
 
 ### 常用命令
@@ -213,4 +208,4 @@ rm /tmp/node.tar.xz
 
 ---
 
-*本文档涵盖截至 2026-07-16 的所有服务器配置。*
+*本文档涵盖截至 2026-07-20 的所有服务器配置。*
