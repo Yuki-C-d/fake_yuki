@@ -286,12 +286,6 @@ audio { display: none; }
     </div>
     <audio id="player" preload="auto"></audio>
 
-    <!-- ── Source Tabs ── -->
-    <div class="source-tabs">
-      <span class="source-tab active" data-src="local" id="tabLocal">📁 本地音乐</span>
-      <span class="source-tab" data-src="netease" id="tabNetease">🎵 网易云</span>
-    </div>
-
     <!-- ── Layout ── -->
     <div class="main-layout">
       <!-- Sidebar -->
@@ -319,7 +313,7 @@ audio { display: none; }
         </div>
 
         <!-- Upload (local only) -->
-        <div class="upload-zone" id="uploadZone" style="display:none;">
+        <div class="upload-zone" id="uploadZone">
           📁 拖拽音频文件上传
           <input type="file" id="fileInput" accept=".m4a,.flac,.mp3,.ogg,.wav,.aac,.ncm" hidden multiple>
         </div>
@@ -365,7 +359,6 @@ audio { display: none; }
 //  State
 // ═══════════════════════════════════════════════
 const SOURCE = { LOCAL: 'local', NETEASE: 'netease' };
-let currentSource = SOURCE.LOCAL;
 
 // Local
 let songs = [];
@@ -400,8 +393,6 @@ const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
 const uploadProgress = document.getElementById('uploadProgress');
 const btnPlay = document.getElementById('btnPlay');
-const tabLocal = document.getElementById('tabLocal');
-const tabNetease = document.getElementById('tabNetease');
 const sectionNcm = document.getElementById('sectionNcm');
 
 let qrTimer = null;
@@ -443,7 +434,7 @@ function showCtxMenu(e, type, targetId) {
       fetch('/api/playlists/' + targetId, {method:'DELETE'}).then(function(r){
         if (r.ok) {
           toast('✅ 已删除');
-          if (currentPlaylistId === targetId) { currentPlaylistId = null; switchSource(SOURCE.LOCAL); }
+          if (currentPlaylistId === targetId) { currentPlaylistId = null; renderSongView(); }
           loadPlaylists(); renderSongList();
         } else toast('❌ 失败');
       });
@@ -517,7 +508,7 @@ ctxDeletePlaylist.addEventListener('click', async () => {
   const r = await fetch(`/api/playlists/${plId}`, { method: 'DELETE' });
   if (r.ok) {
     toast('✅ 已删除');
-    if (currentPlaylistId === plId) { currentPlaylistId = null; switchSource(SOURCE.LOCAL); }
+    if (currentPlaylistId === plId) { currentPlaylistId = null; renderSongView(); }
     await loadPlaylists();
     renderSongList();
   } else toast('❌ 删除失败');
@@ -534,42 +525,17 @@ function toast(msg) {
 }
 
 // ═══════════════════════════════════════════════
-//  Source switching
-// ═══════════════════════════════════════════════
-function switchSource(src, keepPlaylist) {
-  if (currentSource === src) return; // already on this source
-  currentSource = src;
-  tabLocal.classList.toggle('active', src === SOURCE.LOCAL);
-  tabNetease.classList.toggle('active', src === SOURCE.NETEASE);
-  uploadZone.style.display = src === SOURCE.LOCAL ? '' : 'none';
-  if (src === SOURCE.LOCAL) {
-    if (!keepPlaylist) currentPlaylistId = null;
-    renderSongList();
-    updateLocalPlaylistNav();
-  } else {
-    renderNcmTracks();
-  }
-}
-
-tabLocal.addEventListener('click', () => switchSource(SOURCE.LOCAL));
-tabNetease.addEventListener('click', () => switchSource(SOURCE.NETEASE));
-
-// ═══════════════════════════════════════════════
 //  Player
 // ═══════════════════════════════════════════════
 function getQueue() {
-  if (currentSource === SOURCE.LOCAL) {
-    const q = searchInput.value.trim().toLowerCase();
-    let pool = songs;
-    if (currentPlaylistId !== null) {
-      const ids = playlistSongIds.get(currentPlaylistId) || new Set();
-      pool = songs.filter(s => ids.has(s.id));
-    }
-    if (q) pool = pool.filter(s => (s.title+s.artist+(s.album||'')).toLowerCase().includes(q));
-    return pool;
-  } else {
-    return ncmTracks;
+  var q = searchInput.value.trim().toLowerCase();
+  var pool = songs;
+  if (currentPlaylistId !== null) {
+    var ids = playlistSongIds.get(currentPlaylistId) || new Set();
+    pool = songs.filter(function(s){ return ids.has(s.id); });
   }
+  if (q) pool = pool.filter(function(s){ return (s.title+s.artist+(s.album||'')).toLowerCase().includes(q); });
+  return pool;
 }
 
 async function playTrack(track, source) {
@@ -658,6 +624,9 @@ setInterval(() => {
   }
 }, 60000);
 
+function renderSongView() { renderSongList(); updateLocalPlaylistNav(); }
+function renderNcmView() { renderNcmTracks(); }
+
 // ═══════════════════════════════════════════════
 //  Local music
 // ═══════════════════════════════════════════════
@@ -690,17 +659,17 @@ function updateLocalPlaylistNav() {
   });
   // set active
   localPlaylistNav.querySelectorAll('li').forEach(li => {
-    li.classList.toggle('active', String(li.dataset.plId) === String(currentPlaylistId) && currentSource === SOURCE.LOCAL);
+    li.classList.toggle('active', String(li.dataset.plId) === String(currentPlaylistId) );
   });
   playlists.forEach(pl => {
     const li = document.createElement('li');
     li.dataset.plId = pl.id;
     li.dataset.plName = pl.name;
-    if (String(pl.id) === String(currentPlaylistId) && currentSource === SOURCE.LOCAL) li.classList.add('active');
+    if (String(pl.id) === String(currentPlaylistId) ) li.classList.add('active');
     li.innerHTML = `📋 ${esc(pl.name)} <span class="count">${playlistSongIds.get(pl.id)?.size || 0}</span>`;
     li.addEventListener('click', () => {
       currentPlaylistId = parseInt(pl.id);
-      switchSource(SOURCE.LOCAL, true);
+      renderSongView();
       updateLocalPlaylistNav();
       renderSongList();
     });
@@ -724,7 +693,6 @@ function getFilteredLocal() {
 }
 
 function renderSongList() {
-  if (currentSource === SOURCE.NETEASE) { renderNcmTracks(); return; }
   const filtered = getFilteredLocal();
   if (!filtered.length) {
     songList.innerHTML = '<li class="empty">🔍 没有匹配的歌曲</li>';
@@ -751,9 +719,7 @@ function renderSongList() {
 // "全部歌曲" click
 localPlaylistNav.querySelector('li[data-pl-id=""]').addEventListener('click', () => {
   currentPlaylistId = null;
-  switchSource(SOURCE.LOCAL);
-  updateLocalPlaylistNav();
-  renderSongList();
+  renderSongView();
 });
 
 // ═══════════════════════════════════════════════
@@ -849,7 +815,7 @@ async function ncmLogout() {
   ncmTracks = [];
   renderNcmUser();
   ncmPlaylistNav.innerHTML = '';
-  if (currentSource === SOURCE.NETEASE) switchSource(SOURCE.LOCAL);
+  renderSongView();
 }
 
 async function loadNcmPlaylists() {
@@ -875,7 +841,7 @@ function renderNcmPlaylistNav() {
     li.innerHTML = `🎶 ${esc(pl.name)} <span class="count">${pl.trackCount||''}</span>`;
     li.addEventListener('click', () => {
       ncmPlaylistId = pl.id;
-      switchSource(SOURCE.NETEASE);
+      renderNcmView();
       renderNcmPlaylistNav();
       loadNcmTracks(pl.id);
     });
@@ -1003,17 +969,10 @@ document.getElementById('btnNewPlaylist').addEventListener('click', async () => 
 var searchTimer = null;
 searchInput.addEventListener('input', () => {
   clearTimeout(searchTimer);
-  if (currentSource === SOURCE.NETEASE) {
-    searchTimer = setTimeout(doNcmSearch, 400);
-  } else {
-    searchTimer = setTimeout(doUnifiedSearch, 200);
-  }
+  searchTimer = setTimeout(doUnifiedSearch, 200);
 });
 searchInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    clearTimeout(searchTimer);
-    currentSource === SOURCE.NETEASE ? doNcmSearch() : doUnifiedSearch();
-  }
+  if (e.key === 'Enter') { clearTimeout(searchTimer); doUnifiedSearch(); }
 });
 
 async function doNcmSearch() {
