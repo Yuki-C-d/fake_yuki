@@ -567,9 +567,14 @@ async function playTrack(track, source) {
   try { await player.play(); } catch (e) {}
   updateNowPlaying(track, source);
   updatePlayBtn();
-  // Just update active indicator in the current view
-  if (source === SOURCE.NETEASE && displayedTracks.length) renderNcmTracks();
-  else if (source === SOURCE.LOCAL) renderSongList();
+  // Update active indicator without re-rendering the whole list
+  var allLi = songList.querySelectorAll('li[data-id]');
+  allLi.forEach(function(li){
+    var isActive = (li.dataset.src === 'netease' ? SOURCE.NETEASE : SOURCE.LOCAL) === source && li.dataset.id == track.id;
+    li.classList.toggle('active', isActive);
+    var idx = li.querySelector('.idx');
+    if (idx) idx.textContent = isActive ? '▶' : idx.textContent.replace('▶','');
+  });
 }
 
 function updateNowPlaying(track, source) {
