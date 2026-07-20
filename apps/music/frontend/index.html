@@ -560,7 +560,9 @@ async function playTrack(track, source) {
 
   try { await player.play(); } catch (e) {}
   updateNowPlaying(track, source);
-  renderSongList();
+  // Re-render current view without switching
+  if (source === SOURCE.NETEASE && ncmTracks.length) renderNcmTracks();
+  else renderSongList();
   updatePlayBtn();
 }
 
