@@ -548,8 +548,9 @@ async function playTrack(track, source) {
     try {
       const r = await fetch(`/api/ncm/song/${track.id}/url?level=standard`);
       const d = await r.json();
-      if (d.code === 200 && d.data?.[0]?.url) {
-        player.src = d.data[0].url;
+      const url = (d.data||[])[0]?.url || d.url;
+      if (url) {
+        player.src = url;
         ncmUrlExpires = Date.now() + 55 * 60000;
       } else {
         toast('无法获取播放链接');
