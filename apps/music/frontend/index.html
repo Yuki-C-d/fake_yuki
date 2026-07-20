@@ -606,19 +606,18 @@ function updatePlayBtn() {
   btnPlay.textContent = player.paused ? '▶' : '⏸';
 }
 
+function trackSource(t){ return (t.source==='netease'||(t.ar&&!t.file_path)) ? SOURCE.NETEASE : SOURCE.LOCAL; }
 function prev() {
-  const q = getQueue();
-  if (!q.length) return;
-  const idx = q.findIndex(s => s.id == currentTrackId);
-  const prev = idx > 0 ? q[idx-1] : q[q.length-1];
-  playTrack(prev, currentTrackSource);
+  var q = getQueue(); if (!q.length) return;
+  var idx = q.findIndex(function(s){return s.id==currentTrackId;});
+  var t = idx > 0 ? q[idx-1] : q[q.length-1];
+  playTrack(t, trackSource(t));
 }
 function next() {
-  const q = getQueue();
-  if (!q.length) return;
-  const idx = q.findIndex(s => s.id == currentTrackId);
-  const next = idx < q.length-1 ? q[idx+1] : q[0];
-  playTrack(next, currentTrackSource);
+  var q = getQueue(); if (!q.length) return;
+  var idx = q.findIndex(function(s){return s.id==currentTrackId;});
+  var t = idx < q.length-1 ? q[idx+1] : q[0];
+  playTrack(t, trackSource(t));
 }
 function togglePlay() {
   if (player.paused) {
