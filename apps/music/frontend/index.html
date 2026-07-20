@@ -528,7 +528,10 @@ function toast(msg) {
 // ═══════════════════════════════════════════════
 //  Player
 // ═══════════════════════════════════════════════
+var displayedTracks = []; // currently visible tracks (local, NCM, or search results)
 function getQueue() {
+  // Return whatever is currently visible
+  if (displayedTracks.length) return displayedTracks;
   var q = searchInput.value.trim().toLowerCase();
   var pool = songs;
   if (currentPlaylistId !== null) {
@@ -536,6 +539,7 @@ function getQueue() {
     pool = songs.filter(function(s){ return ids.has(s.id); });
   }
   if (q) pool = pool.filter(function(s){ return (s.title+s.artist+(s.album||'')).toLowerCase().includes(q); });
+  displayedTracks = pool;
   return pool;
 }
 
@@ -562,10 +566,10 @@ async function playTrack(track, source) {
 
   try { await player.play(); } catch (e) {}
   updateNowPlaying(track, source);
-  // Re-render current view without switching
-  if (source === SOURCE.NETEASE && ncmTracks.length) renderNcmTracks();
-  else renderSongList();
   updatePlayBtn();
+  // Just update active indicator in the current view
+  if (source === SOURCE.NETEASE && displayedTracks.length) renderNcmTracks();
+  else if (source === SOURCE.LOCAL) renderSongList();
 }
 
 function updateNowPlaying(track, source) {
@@ -698,6 +702,7 @@ function getFilteredLocal() {
 
 function renderSongList() {
   const filtered = getFilteredLocal();
+  displayedTracks = filtered;
   if (!filtered.length) {
     songList.innerHTML = '<li class="empty">🔍 没有匹配的歌曲</li>';
   } else {
@@ -871,6 +876,7 @@ async function loadNcmTracks(plId) {
 }
 
 function renderNcmTracks() {
+  displayedTracks = ncmTracks;
   if (!ncmTracks.length) {
     songList.innerHTML = '<li class="empty">📋 选择一个歌单或登录后查看</li>';
     return;
@@ -1018,6 +1024,8 @@ async function doNcmSearch() {
         '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
     });
   }
+  // Build displayed queue for prev/next
+  displayedTracks = localResults.concat(ncmResults);
   songList.innerHTML = html;
   bindSongClicks();
 }
@@ -1080,6 +1088,8 @@ async function doUnifiedSearch() {
         '<span class="dur">'+fmtDur(s.duration)+'</span></li>';
     });
   }
+  // Build displayed queue for prev/next
+  displayedTracks = localResults.concat(ncmResults);
   songList.innerHTML = html;
   bindSongClicks();
 }
