@@ -87,18 +87,29 @@ body::before {
 }
 
 /* ═══════════════════ 播放器 ═══════════════════ */
-/* Progress bar — horizontal, under player */
-.progress-wrap { display: flex; align-items: center; gap: var(--sp); margin-top: var(--sp2); }
-.progress-wrap .time { font-size: 0.7rem; color: var(--c-text-lt); min-width: 36px; }
+/* Floating bottom progress bar */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9998;
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.6);
+  padding: var(--sp2) var(--sp4);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+}
+.bottom-bar .track-name {
+  font-size: 0.8rem; font-weight: 600; color: var(--c-blue-dk);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: var(--sp);
+}
+.progress-wrap { display: flex; align-items: center; gap: var(--sp); }
+.progress-wrap .time { font-size: 0.7rem; color: var(--c-text-lt); min-width: 34px; }
 .progress-rail {
-  flex: 1; height: 4px; background: rgba(196,223,240,0.5); border-radius: 2px;
+  flex: 1; height: 6px; background: rgba(196,223,240,0.5); border-radius: 3px;
   cursor: pointer; position: relative;
 }
-.progress-rail:hover { height: 6px; }
 .progress-fill {
   position: absolute; top: 0; left: 0; height: 100%;
-  background: linear-gradient(90deg, var(--c-blue-lt), var(--c-warm));
-  border-radius: 2px; transition: width 0.2s linear;
+  background: linear-gradient(90deg, var(--c-blue), var(--c-warm));
+  border-radius: 3px; transition: width 0.2s linear;
 }
 
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
@@ -300,13 +311,6 @@ audio { display: none; }
     </div>
     <audio id="player" preload="auto"></audio>
 
-    <!-- ── Progress Bar ── -->
-    <div class="progress-wrap">
-      <span class="time" id="timeCur">0:00</span>
-      <div class="progress-rail" id="progressRail"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="time" id="timeTotal">0:00</span>
-    </div>
-
     <!-- ── Layout ── -->
     <div class="main-layout">
       <!-- Sidebar -->
@@ -367,6 +371,16 @@ audio { display: none; }
   <div class="ctx-sep" id="ctxSepPlaylist"></div>
   <div class="ctx-item danger" id="ctxRenamePlaylist">✏️ 重命名歌单</div>
   <div class="ctx-item danger" id="ctxDeletePlaylist">🗑️ 删除歌单</div>
+</div>
+
+<!-- ═══════════════════ Floating Bottom Bar ═══════════════════ -->
+<div class="bottom-bar" id="bottomBar">
+  <div class="track-name" id="bottomTrackName">选择一首歌开始播放</div>
+  <div class="progress-wrap">
+    <span class="time" id="timeCur">0:00</span>
+    <div class="progress-rail" id="progressRail"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="time" id="timeTotal">0:00</span>
+  </div>
 </div>
 
 <!-- ═══════════════════ Footer ═══════════════════ -->
@@ -598,18 +612,20 @@ async function playTrack(track, source) {
   });
 }
 
+var bottomTrackName = document.getElementById('bottomTrackName');
 function updateNowPlaying(track, source) {
   if (!track) {
-    nowPlaying.innerHTML = '<span class="none">选一首歌开始播放</span>';
+    nowPlaying.innerHTML = '<span class="none">选择一首歌开始播放</span>';
+    bottomTrackName.textContent = '选择一首歌开始播放';
     return;
   }
-  const badge = source === SOURCE.LOCAL
-    ? '<span class="source-badge local">本地</span>'
-    : '<span class="source-badge ncm">网易云</span>';
+  const badge = source === SOURCE.LOCAL ? ' [本地]' : ' [网易云]';
   nowPlaying.innerHTML = `
     <div class="title">${esc(track.title || '未知')}</div>
-    <div class="artist">${esc(track.artist || '')} ${badge}</div>`;
+    <div class="artist">${esc(track.artist || '')} ${sourceBadge(source)}</div>`;
+  bottomTrackName.textContent = (track.title || '未知') + ' — ' + (track.artist || '') + badge;
 }
+function sourceBadge(src){ return src===SOURCE.LOCAL ? '<span class=\"source-badge local\">本地</span>' : '<span class=\"source-badge ncm\">网易云</span>'; }
 
 function updatePlayBtn() {
   btnPlay.textContent = player.paused ? '▶' : '⏸';
