@@ -372,6 +372,7 @@ let ncmUser = null;
 let ncmPlaylists = [];
 let ncmTracks = [];
 let ncmPlaylistId = null;
+let ncmSearchResults = [];  // search results cache for playback
 
 // Player
 let currentTrackId = null;      // unified id (local=int, ncm=str)
@@ -896,7 +897,7 @@ function bindSongClicks() {
         const s = songs.find(x => x.id == id);
         if (s) playTrack(s, SOURCE.LOCAL);
       } else {
-        const s = ncmTracks.find(x => x.id == id);
+        const s = ncmTracks.find(x => x.id == id) || ncmSearchResults.find(x => x.id == id);
         if (s) playTrack(s, SOURCE.NETEASE);
       }
     });
@@ -1052,6 +1053,7 @@ async function doUnifiedSearch() {
           source: 'netease'
         };
       });
+      ncmSearchResults = ncmResults;
     } catch(e) {}
   }
   // 3. Render unified list
