@@ -87,6 +87,17 @@ body::before {
 }
 
 /* ═══════════════════ 播放器 ═══════════════════ */
+/* Progress bar — vertical right side */
+.progress-rail {
+  position: fixed; right: 16px; top: 0; width: 4px; height: 100vh; z-index: 100;
+  background: rgba(255,255,255,0.2); border-radius: 2px; cursor: pointer;
+}
+.progress-fill {
+  position: absolute; top: 0; left: 0; width: 100%;
+  background: var(--c-warm); border-radius: 2px;
+  transition: height 0.3s linear;
+}
+
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
 .player-info { flex: 1; min-width: 0; }
 .player-info .title { font-size: 1rem; font-weight: 600; color: var(--c-blue-dk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -261,6 +272,7 @@ audio { display: none; }
 
 <!-- ═══════════════════ 壁纸 ═══════════════════ -->
 <div class="wallpaper"><img src="/wallpaper.jpg" alt=""></div>
+<div class="progress-rail" id="progressRail" title="拖动调整进度"><div class="progress-fill" id="progressFill"></div></div>
 
 <!-- ═══════════════════ Hero ═══════════════════ -->
 <section class="hero">
@@ -599,18 +611,18 @@ function prev() {
   if (!q.length) return;
   const idx = q.findIndex(s => s.id == currentTrackId);
   const prev = idx > 0 ? q[idx-1] : q[q.length-1];
-  playTrack(prev, currentSource);
+  playTrack(prev, currentTrackSource);
 }
 function next() {
   const q = getQueue();
   if (!q.length) return;
   const idx = q.findIndex(s => s.id == currentTrackId);
   const next = idx < q.length-1 ? q[idx+1] : q[0];
-  playTrack(next, currentSource);
+  playTrack(next, currentTrackSource);
 }
 function togglePlay() {
   if (player.paused) {
-    if (!player.src) { const q = getQueue(); if (q.length) playTrack(q[0], currentSource); }
+    if (!player.src) { const q = getQueue(); if (q.length) playTrack(q[0], currentTrackSource); }
     else player.play().catch(() => {});
   } else player.pause();
 }
@@ -618,6 +630,17 @@ function togglePlay() {
 player.addEventListener('play', updatePlayBtn);
 player.addEventListener('pause', updatePlayBtn);
 player.addEventListener('ended', next);
+// Progress bar
+var progressRail = document.getElementById('progressRail');
+var progressFill = document.getElementById('progressFill');
+player.addEventListener('timeupdate', function(){
+  if (player.duration) progressFill.style.height = (player.currentTime / player.duration * 100) + '%';
+});
+progressRail.addEventListener('click', function(e){
+  if (!player.duration) return;
+  var pct = e.clientY / window.innerHeight;
+  player.currentTime = pct * player.duration;
+});
 document.getElementById('btnPrev').addEventListener('click', prev);
 document.getElementById('btnNext').addEventListener('click', next);
 btnPlay.addEventListener('click', togglePlay);
