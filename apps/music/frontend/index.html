@@ -836,7 +836,7 @@ function renderNcmPlaylistNav() {
   ncmPlaylists.forEach(pl => {
     const li = document.createElement('li');
     li.dataset.plId = pl.id;
-    const active = String(pl.id) === String(ncmPlaylistId) && currentSource === SOURCE.NETEASE;
+    const active = String(pl.id) === String(ncmPlaylistId);
     if (active) li.classList.add('active');
     li.innerHTML = `🎶 ${esc(pl.name)} <span class="count">${pl.trackCount||''}</span>`;
     li.addEventListener('click', () => {
