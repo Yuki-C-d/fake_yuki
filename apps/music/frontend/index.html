@@ -89,8 +89,8 @@ body::before {
 /* ═══════════════════ 播放器 ═══════════════════ */
 /* Progress bar — vertical right side */
 .progress-rail {
-  position: fixed; right: 16px; top: 0; width: 4px; height: 100vh; z-index: 100;
-  background: rgba(255,255,255,0.2); border-radius: 2px; cursor: pointer;
+  position: fixed; right: 12px; top: 0; width: 8px; height: 100vh; z-index: 9998;
+  background: rgba(255,255,255,0.25); border-radius: 4px; cursor: pointer;
 }
 .progress-fill {
   position: absolute; top: 0; left: 0; width: 100%;
@@ -896,6 +896,7 @@ async function loadNcmTracks(plId) {
         artist: (s.ar||[]).map(a => a.name).join(' / '),
         album: s.al?.name,
         duration: (s.dt||0) / 1000,
+        source: 'netease'
       }));
       renderNcmTracks();
     }
