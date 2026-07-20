@@ -87,21 +87,18 @@ body::before {
 }
 
 /* ═══════════════════ 播放器 ═══════════════════ */
-/* Progress bar — vertical right side */
+/* Progress bar — horizontal, under player */
+.progress-wrap { display: flex; align-items: center; gap: var(--sp); margin-top: var(--sp2); }
+.progress-wrap .time { font-size: 0.7rem; color: var(--c-text-lt); min-width: 36px; }
 .progress-rail {
-  position: fixed; top: 0; width: 5px; height: 100vh; z-index: 9998;
-  /* Aligned to right of content area (max-width:1040px, centered) */
-  left: calc(50% + 536px);
-  background: rgba(196,223,240,0.5); border-radius: 3px; cursor: pointer;
-  box-shadow: 0 0 6px rgba(74,122,154,0.15);
+  flex: 1; height: 4px; background: rgba(196,223,240,0.5); border-radius: 2px;
+  cursor: pointer; position: relative;
 }
-.progress-rail:hover { background: rgba(74,122,154,0.25); }
-@media (max-width: 1100px) { .progress-rail { left: auto; right: 8px; } }
+.progress-rail:hover { height: 6px; }
 .progress-fill {
-  position: absolute; top: 0; left: 0; width: 100%;
-  background: linear-gradient(180deg, var(--c-blue-lt), var(--c-warm));
-  border-radius: 3px; transition: height 0.3s linear;
-  box-shadow: 0 0 8px rgba(232,104,58,0.3);
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: linear-gradient(90deg, var(--c-blue-lt), var(--c-warm));
+  border-radius: 2px; transition: width 0.2s linear;
 }
 
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
@@ -278,7 +275,6 @@ audio { display: none; }
 
 <!-- ═══════════════════ 壁纸 ═══════════════════ -->
 <div class="wallpaper"><img src="/wallpaper.jpg" alt=""></div>
-<div class="progress-rail" id="progressRail" title="拖动调整进度"><div class="progress-fill" id="progressFill"></div></div>
 
 <!-- ═══════════════════ Hero ═══════════════════ -->
 <section class="hero">
@@ -303,6 +299,13 @@ audio { display: none; }
       </div>
     </div>
     <audio id="player" preload="auto"></audio>
+
+    <!-- ── Progress Bar ── -->
+    <div class="progress-wrap">
+      <span class="time" id="timeCur">0:00</span>
+      <div class="progress-rail" id="progressRail"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="time" id="timeTotal">0:00</span>
+    </div>
 
     <!-- ── Layout ── -->
     <div class="main-layout">
@@ -635,15 +638,23 @@ function togglePlay() {
 player.addEventListener('play', updatePlayBtn);
 player.addEventListener('pause', updatePlayBtn);
 player.addEventListener('ended', next);
-// Progress bar
+// Progress bar (horizontal)
 var progressRail = document.getElementById('progressRail');
 var progressFill = document.getElementById('progressFill');
-player.addEventListener('timeupdate', function(){
-  if (player.duration) progressFill.style.height = (player.currentTime / player.duration * 100) + '%';
-});
+var timeCur = document.getElementById('timeCur');
+var timeTotal = document.getElementById('timeTotal');
+function updateProgress() {
+  if (!player.duration) return;
+  var pct = player.currentTime / player.duration * 100;
+  progressFill.style.width = pct + '%';
+  timeCur.textContent = fmtDur(player.currentTime);
+}
+player.addEventListener('loadedmetadata', function(){ timeTotal.textContent = fmtDur(player.duration); });
+player.addEventListener('timeupdate', updateProgress);
 progressRail.addEventListener('click', function(e){
   if (!player.duration) return;
-  var pct = e.clientY / window.innerHeight;
+  var rect = progressRail.getBoundingClientRect();
+  var pct = (e.clientX - rect.left) / rect.width;
   player.currentTime = pct * player.duration;
 });
 document.getElementById('btnPrev').addEventListener('click', prev);
