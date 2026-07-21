@@ -321,12 +321,11 @@ npm config set registry https://registry.npmmirror.com
 | 优先级 | 事项 |
 |--------|------|
 | ⭐ | 域名备案 → 绑 DNS，主站上线 fake-star.xyz |
-| ⭐ | 导航站迁至 `nav.fake-star.xyz` + yuki_风格 重构 |
+| ⭐ | 导航站迁至 `nav.fake-star.xyz` 子域名 |
 | ⭐⭐ | 随手接后端（碎碎念 + 图片上传） |
 | ⭐⭐ | 移动端适配 |
-| ⭐⭐ | 音乐站绑域名 + yuki_风格 重构 |
+| ⭐⭐ | 音乐站绑域名（备案后） |
 | ⭐⭐⭐ | 摄影站搭建 |
-| ⭐⭐⭐ | 音质切换 (FLAC ↔ M4A) |
 | 💤 | 用户认证 / Agent 接入 |
 
 ---
