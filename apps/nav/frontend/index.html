@@ -19,15 +19,27 @@ body{font-family:var(--f-serif);font-weight:500;line-height:2.1;color:var(--c-te
 .wallpaper img{width:100%;height:100%;object-fit:cover;object-position:center 35%}
 .wallpaper::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.06) 0%,transparent 25%,transparent 60%,rgba(0,0,0,0.10) 85%,rgba(0,0,0,0.16) 100%)}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px}
-.hero{position:relative;z-index:1;height:70vh;min-height:400px;display:flex;align-items:center;justify-content:center;text-align:center}
+.hero{position:relative;z-index:1;height:60vh;min-height:350px;display:flex;align-items:center;justify-content:center;text-align:center}
 .hero-inner{color:#fff;padding:var(--sp4);max-width:600px}
-.hero-inner h1{font-size:3rem;font-weight:600;letter-spacing:.08em;text-shadow:0 4px 30px rgba(0,0,0,.25)}
-.hero-inner p{font-size:1rem;letter-spacing:.15em;opacity:.8;text-shadow:0 2px 15px rgba(0,0,0,.15);margin-top:8px}
-.content{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 var(--sp4) 120px}
-.glass-card{background:rgba(255,255,255,.45);backdrop-filter:blur(28px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-radius:24px;padding:var(--sp4) var(--sp6);border:1px solid rgba(255,255,255,.6);box-shadow:0 2px 4px rgba(0,0,0,.02),0 8px 24px rgba(0,0,0,.04),0 20px 60px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.6);margin-bottom:var(--sp6)}
-.glass-card h2{font-family:var(--f-serif);font-size:1.2rem;font-weight:600;color:var(--c-blue-dk);margin-bottom:var(--sp3);padding-bottom:var(--sp2);border-bottom:1px solid rgba(74,122,154,.1);letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between}
-.link-list{display:flex;flex-direction:column;gap:var(--sp)}
-.link-item{display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.35);backdrop-filter:blur(12px);border-radius:14px;text-decoration:none;color:var(--c-text);border:1px solid rgba(255,255,255,.4);transition:all .2s;position:relative}
+.hero-inner h1{font-size:3rem;font-weight:600;letter-spacing:.08em;text-shadow:0 4px 30px rgba(0,0,0,.25);margin-bottom:4px}
+.hero-inner p{font-size:1rem;letter-spacing:.15em;opacity:.8;text-shadow:0 2px 15px rgba(0,0,0,.15)}
+.content{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 var(--sp4) 120px}
+.glass-card{background:rgba(255,255,255,.45);backdrop-filter:blur(28px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-radius:24px;padding:var(--sp4) var(--sp6) var(--sp6);border:1px solid rgba(255,255,255,.6);box-shadow:0 2px 4px rgba(0,0,0,.02),0 8px 24px rgba(0,0,0,.04),0 20px 60px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.6)}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--sp3);padding-bottom:var(--sp2);border-bottom:1px solid rgba(74,122,154,.08)}
+.tab{padding:6px 18px;border-radius:30px;font-size:.8rem;cursor:pointer;border:1px solid rgba(74,122,154,.15);background:rgba(255,255,255,.3);color:var(--c-text-lt);transition:all .25s;letter-spacing:.04em;font-family:var(--f-serif)}
+.tab:hover{border-color:var(--c-blue);color:var(--c-blue)}
+.tab.active{background:var(--c-blue);color:#fff;border-color:var(--c-blue);box-shadow:0 2px 8px rgba(74,122,154,.2)}
+.tab-add{border-style:dashed;opacity:.6;font-size:1rem;padding:4px 14px}
+.tab-add:hover{opacity:1}
+
+/* Links */
+.link-panel{position:relative}
+.link-group{display:none;flex-direction:column;gap:var(--sp);animation:fadeSlide .3s ease}
+.link-group.active{display:flex}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.link-item{display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.35);backdrop-filter:blur(12px);border-radius:14px;text-decoration:none;color:var(--c-text);border:1px solid rgba(255,255,255,.4);transition:all .2s}
 .link-item:hover{background:rgba(255,255,255,.55);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.05)}
 .link-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .link-info{min-width:0;flex:1}
@@ -36,43 +48,41 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .link-actions{display:flex;gap:4px;flex-shrink:0}
 .link-actions button{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;cursor:pointer;font-size:12px;transition:all .15s;color:var(--c-text-lt)}
 .link-actions button:hover{background:rgba(74,122,154,.1);border-color:rgba(74,122,154,.2);color:var(--c-blue-dk)}
-.tag{font-size:.6rem;padding:1px 10px;border-radius:30px;letter-spacing:.05em}
-.tag-动漫{background:rgba(232,104,58,.12);color:#B84A2A}
-.tag-AI{background:rgba(126,184,126,.12);color:#4A7A4A}
-.tag-工具{background:rgba(74,122,154,.12);color:var(--c-blue-dk)}
-.tag-归档{background:rgba(196,113,110,.1);color:#A05050}
-.tag-其他{background:rgba(232,200,122,.15);color:#7A6A3A}
-
-.btn-add{display:inline-flex;align-items:center;gap:4px;padding:6px 16px;border-radius:30px;border:1px dashed rgba(74,122,154,.3);background:rgba(255,255,255,.4);color:var(--c-blue-dk);font-family:var(--f-serif);font-size:.78rem;cursor:pointer;transition:all .2s}
-.btn-add:hover{background:rgba(74,122,154,.08);border-color:var(--c-blue)}
+.btn-row{display:flex;justify-content:center;margin-top:var(--sp3)}
+.btn-add-link{padding:8px 24px;border-radius:30px;border:1px dashed rgba(74,122,154,.3);background:rgba(255,255,255,.4);color:var(--c-blue-dk);font-family:var(--f-serif);font-size:.78rem;cursor:pointer;transition:all .2s}
+.btn-add-link:hover{background:rgba(74,122,154,.08);border-color:var(--c-blue)}
 
 /* Modal */
 .modal-overlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 .modal-box{background:rgba(255,255,255,.92);backdrop-filter:blur(28px);border-radius:20px;padding:var(--sp4);max-width:400px;width:90%;border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 40px rgba(0,0,0,.1)}
 .modal-box h3{font-size:1rem;color:var(--c-blue-dk);margin-bottom:var(--sp3)}
 .modal-box input,.modal-box select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(74,122,154,.2);background:rgba(255,255,255,.5);font-family:var(--f-serif);font-size:.85rem;margin-bottom:var(--sp);outline:none}
-.modal-box input:focus{border-color:var(--c-blue)}
+.modal-box input:focus,.modal-box select:focus{border-color:var(--c-blue)}
 .modal-box .btn-row{display:flex;gap:var(--sp);justify-content:flex-end;margin-top:var(--sp2)}
-.modal-box .btn-save{padding:8px 20px;border-radius:30px;border:none;background:var(--c-blue);color:#fff;font-family:var(--f-serif);cursor:pointer}
-.modal-box .btn-cancel{padding:8px 20px;border-radius:30px;border:1px solid rgba(74,122,154,.2);background:transparent;color:var(--c-text-lt);font-family:var(--f-serif);cursor:pointer}
+.btn-save{padding:8px 20px;border-radius:30px;border:none;background:var(--c-blue);color:#fff;font-family:var(--f-serif);cursor:pointer}
+.btn-cancel{padding:8px 20px;border-radius:30px;border:1px solid rgba(74,122,154,.2);background:transparent;color:var(--c-text-lt);font-family:var(--f-serif);cursor:pointer}
+.btn-danger{padding:8px 20px;border-radius:30px;border:none;background:var(--c-warm);color:#fff;font-family:var(--f-serif);cursor:pointer;font-size:.8rem}
 
 .footer{position:relative;z-index:1;text-align:center;padding:var(--sp3);color:var(--c-text-lt);font-size:.75rem;opacity:.5}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--c-blue-dk);color:#fff;padding:10px 24px;border-radius:30px;font-size:.8rem;z-index:10001;animation:fadeUp .3s}
 @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(12px)}}
-@media(max-width:768px){.hero-inner h1{font-size:2rem}.content{padding:0 var(--sp2) 80px}}
+@media(max-width:768px){.hero-inner h1{font-size:2rem}.content{padding:0 var(--sp2) 80px}.tabs{gap:4px}.tab{padding:4px 12px;font-size:.72rem}}
 </style>
 </head>
 <body>
 <div class="wallpaper"><img src="wallpaper.jpg" alt=""></div>
 
 <section class="hero">
-  <div class="hero-inner">
-    <h1>fake-star ✦</h1>
-    <p>书签收藏</p>
-  </div>
+  <div class="hero-inner"><h1>fake-star ✦</h1><p>书签收藏</p></div>
 </section>
 
-<div class="content" id="content"></div>
+<div class="content">
+  <div class="glass-card">
+    <div class="tabs" id="tabsBar"></div>
+    <div class="link-panel" id="linkPanel"></div>
+    <div class="btn-row"><button class="btn-add-link" onclick="openAdd()">＋ 添加书签</button></div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="editModal" style="display:none">
   <div class="modal-box">
@@ -80,12 +90,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
     <input id="editName" placeholder="名称">
     <input id="editUrl" placeholder="URL">
     <input id="editIcon" placeholder="图标（emoji）" maxlength="4">
-    <select id="editTag">
-      <option value="工具">工具</option><option value="动漫">动漫</option>
-      <option value="AI">AI</option><option value="归档">归档</option><option value="其他">其他</option>
-    </select>
+    <select id="editTag"></select>
+    <div style="display:flex;gap:4px">
+      <input id="editNewTag" placeholder="或输入新分类" style="flex:1">
+    </div>
     <div class="btn-row">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-danger" id="btnDelete" style="display:none;margin-right:auto" onclick="deleteBookmark()">删除</button>
       <button class="btn-save" id="btnSave">保存</button>
     </div>
   </div>
@@ -94,56 +105,89 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 <footer class="footer">fake-star.xyz · 2026</footer>
 
 <script>
-var bookmarks = [];
-var editId = null;
-
-function tagClass(tag){return 'tag-'+tag}
+var bookmarks=[],activeTag=null,editId=null;
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function toast(m){var e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(function(){e.remove()},2500)}
 
 async function load(){
-  var r=await fetch('/api/bookmarks');
-  bookmarks=await r.json();
-  render();
+  var r=await fetch('/api/bookmarks');bookmarks=await r.json();render();
+}
+function tags(){
+  var s=new Set();bookmarks.forEach(function(b){s.add(b.tag||'其他')});
+  return Array.from(s);
 }
 function render(){
-  var groups={};
-  bookmarks.forEach(function(b){
-    var t=b.tag||'其他'; if(!groups[t])groups[t]=[]; groups[t].push(b);
+  var t=tags();if(!activeTag||!t.includes(activeTag))activeTag=t[0];
+  // Tabs
+  var th='';
+  t.forEach(function(tag){
+    th+='<span class="tab'+(tag===activeTag?' active':'')+'" onclick="switchTag(\''+esc(tag)+'\')">'+esc(tag)+'</span>';
   });
-  var html='';
-  Object.keys(groups).forEach(function(tag){
-    html+='<div class="glass-card"><h2>'+esc(tag)+' <button class="btn-add" onclick="openAdd(\''+esc(tag)+'\')">＋ 添加</button></h2><div class="link-list">';
-    groups[tag].forEach(function(b){
-      html+='<div class="link-item">'+
-        '<div class="link-icon '+tagClass(tag)+'">'+esc(b.icon||'🔗')+'</div>'+
+  th+='<span class="tab tab-add" onclick="addTag()" title="新建分类">＋</span>';
+  document.getElementById('tabsBar').innerHTML=th;
+
+  // Panels
+  var ph='';
+  t.forEach(function(tag){
+    var items=bookmarks.filter(function(b){return (b.tag||'其他')===tag});
+    ph+='<div class="link-group'+(tag===activeTag?' active':'')+'" data-tag="'+esc(tag)+'">';
+    items.forEach(function(b){
+      ph+='<div class="link-item">'+
+        '<div class="link-icon">'+esc(b.icon||'🔗')+'</div>'+
         '<div class="link-info"><a href="'+esc(b.url)+'" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="name">'+esc(b.name)+'</div><div class="url">'+esc(b.url)+'</div></a></div>'+
         '<div class="link-actions">'+
           '<button onclick="openEdit('+b.id+')" title="编辑">✏️</button>'+
-          '<button onclick="del('+b.id+')" title="删除" style="color:var(--c-warm)">✕</button>'+
         '</div></div>';
     });
-    html+='</div></div>';
+    ph+='</div>';
   });
-  document.getElementById('content').innerHTML=html;
+  document.getElementById('linkPanel').innerHTML=ph;
+
+  // Build tag selector
+  var sel=document.getElementById('editTag');
+  sel.innerHTML=t.map(function(x){return'<option value="'+esc(x)+'">'+esc(x)+'</option>';}).join('');
 }
-function openAdd(tag){
-  editId=null;document.getElementById('editTitle').textContent='添加书签';
-  document.getElementById('editName').value='';document.getElementById('editUrl').value='';
-  document.getElementById('editIcon').value='';document.getElementById('editTag').value=tag||'工具';
+function switchTag(tag){activeTag=tag;render()}
+function addTag(){
+  var name=prompt('新分类名称：');if(!name||!name.trim())return;
+  activeTag=name.trim();render();
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('editTitle').textContent='添加书签';
+  document.getElementById('editName').value='';
+  document.getElementById('editUrl').value='';
+  document.getElementById('editIcon').value='';
+  document.getElementById('editNewTag').value='';
+  document.getElementById('btnDelete').style.display='none';
+  var sel=document.getElementById('editTag');sel.innerHTML='';
+  tags().forEach(function(x){sel.innerHTML+='<option value="'+esc(x)+'">'+esc(x)+'</option>';});
+  sel.value=activeTag||'';
   document.getElementById('editModal').style.display='flex';
 }
 function openEdit(id){
   var b=bookmarks.find(function(x){return x.id===id});if(!b)return;
-  editId=id;document.getElementById('editTitle').textContent='编辑书签';
-  document.getElementById('editName').value=b.name;document.getElementById('editUrl').value=b.url;
-  document.getElementById('editIcon').value=b.icon||'';document.getElementById('editTag').value=b.tag||'工具';
+  editId=id;
+  document.getElementById('editTitle').textContent='编辑书签';
+  document.getElementById('editName').value=b.name;
+  document.getElementById('editUrl').value=b.url;
+  document.getElementById('editIcon').value=b.icon||'';
+  document.getElementById('editNewTag').value='';
+  document.getElementById('btnDelete').style.display='';
+  var sel=document.getElementById('editTag');sel.innerHTML='';
+  tags().forEach(function(x){sel.innerHTML+='<option value="'+esc(x)+'">'+esc(x)+'</option>';});
+  sel.value=b.tag||'其他';
   document.getElementById('editModal').style.display='flex';
 }
 function closeModal(){document.getElementById('editModal').style.display='none'}
 async function save(){
-  var data={name:document.getElementById('editName').value.trim(),url:document.getElementById('editUrl').value.trim(),icon:document.getElementById('editIcon').value,tag:document.getElementById('editTag').value};
-  if(!data.name||!data.url){toast('名称和URL不能为空');return}
+  var name=document.getElementById('editName').value.trim();
+  var url=document.getElementById('editUrl').value.trim();
+  var icon=document.getElementById('editIcon').value;
+  var tag=document.getElementById('editNewTag').value.trim()||document.getElementById('editTag').value;
+  if(!name||!url){toast('名称和URL不能为空');return}
+  var data={name:name,url:url,icon:icon,tag:tag};
   if(editId){
     await fetch('/api/bookmarks/'+editId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
   }else{
@@ -151,11 +195,13 @@ async function save(){
   }
   closeModal();load();toast(editId?'已更新':'已添加');
 }
-async function del(id){
+async function deleteBookmark(){
+  if(!editId)return;
   if(!confirm('确定删除？'))return;
-  await fetch('/api/bookmarks/'+id,{method:'DELETE'});load();toast('已删除');
+  await fetch('/api/bookmarks/'+editId,{method:'DELETE'});closeModal();load();toast('已删除');
 }
 document.getElementById('btnSave').addEventListener('click',save);
+document.getElementById('btnDelete').addEventListener('click',deleteBookmark);
 load();
 </script>
 </body>
