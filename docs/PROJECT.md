@@ -170,28 +170,35 @@ python -m http.server 3000
 
 ---
 
-## 🔗 导航站（书签）
+## 🔗 书签站
 
 | 项目 | 详情 |
 |------|------|
-| 域名 | `https://fake-star.xyz` |
-| 部署 | GitHub Pages (`Yuki-C-d/nav-site`) |
-| 代码 | `apps/nav/index.html` (独立 Git 仓库) |
-| 功能 | 常用网站链接导航，yuki_风格毛玻璃 |
-| 计划 | 备案后迁至 `nav.fake-star.xyz` 子域名 |
+| 地址 | `http://8.166.119.185:8081` |
+| 后端 | FastAPI + SQLite (`apps/bookmarks/data/nav.db`) |
+| 前端 | yuki_风格 SPA：标签页切换 + fadeSlide 动画 + 增删改 |
+| 部署 | ECS systemd `fake-star-nav`，开机自启 |
+| 功能 | 分类管理书签，多设备同步 |
+
+### 组件规范（新增）
+
+| 组件 | 位置 | 说明 |
+|------|------|------|
+| 标签页 `.tab` | 顶部水平 tab 栏 | 圆角 30px，非激活半透明，激活态 `--c-blue` 实色 |
+| 添加按钮 `.btn-add-link` | 卡片底部居中 | 虚线边框 + 半透明底，hover 实色 |
+| 链接列表 `.link-item` | 毛玻璃行 | 编辑/删除操作按钮、emoji 图标 |
+| 弹窗 `.modal-overlay/.modal-box` | 居中浮动 | 毛玻璃底 + backdrop-filter blur(6px) |
+| 过渡动画 `fadeSlide` | 标签切换 | 0.3s，opacity 0→1 + translateY(8px→0) |
 
 ### 更新方法
 
+编辑书签直接在网页上操作（增删改），无需改代码。部署更新：
+
 ```bash
-cd D:\fake_yuki\apps\nav
-# 编辑 index.html
-git add . && git commit -m "更新链接" && git push
-# 1 分钟内自动部署到 fake-star.xyz
+cd D:\fake_yuki
+scp apps/bookmarks/backend/*.py apps/bookmarks/frontend/* root@8.166.119.185:/opt/fake_yuki/apps/bookmarks/
+ssh root@8.166.119.185 "systemctl restart fake-star-nav"
 ```
-
-### DNS 配置
-
-阿里云 DNS: `@` CNAME → `yuki-c-d.github.io`, `www` CNAME → `yuki-c-d.github.io`
 
 ---
 

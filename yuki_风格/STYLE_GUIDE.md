@@ -112,6 +112,50 @@
 }
 ```
 
+### 标签页 (Tab)
+
+```css
+.tab {
+  padding: 6px 18px; border-radius: 30px; font-size: 0.8rem;
+  border: 1px solid rgba(74,122,154,0.15);
+  background: rgba(255,255,255,0.3); color: var(--c-text-lt);
+  transition: all 0.25s;
+}
+.tab.active {
+  background: var(--c-blue); color: #fff; border-color: var(--c-blue);
+  box-shadow: 0 2px 8px rgba(74,122,154,0.2);
+}
+```
+
+### 浮动弹窗 (Modal)
+
+```css
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.3); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-box {
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(28px);
+  border-radius: 20px; padding: var(--sp4); max-width: 400px;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+```
+
+### 链接行 (Link Item)
+
+```css
+.link-item {
+  display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+  background: rgba(255,255,255,0.35); backdrop-filter: blur(12px);
+  border-radius: 14px; border: 1px solid rgba(255,255,255,0.4);
+  transition: all 0.2s;
+}
+.link-item:hover {
+  background: rgba(255,255,255,0.55); transform: translateY(-2px);
+}
+```
+
 ---
 
 ## 📐 间距系统
