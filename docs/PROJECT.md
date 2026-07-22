@@ -11,7 +11,7 @@
 |------|------|------|------|
 | 🏠 **个人主站** | `apps/home/` | 🔨 骨架搭建 | 站点入口，Hero + 功能卡片 + 随手记 |
 | 🎵 音乐播放器 | `apps/music/` | ✅ 运行中 | 自建音乐云，浏览器听歌 |
-| 🔗 导航站 | `apps/nav/` | ✅ 已上线 | fake-star.xyz，存常用链接（将迁至子域名） |
+| 🔗 导航站 | `apps/bookmarks/` | ✅ 已上线 | fake-star.xyz，存常用链接（将迁至子域名） |
 | 🎨 **设计系统** | `yuki_风格/` | ✅ **定稿** | **全站视觉规范，所有功能站风格统一依据** |
 | ☁️ 服务器 | `server/` | ✅ 运行中 | 阿里云 ECS + frp 内网穿透 |
 | 🔧 工具集 | `tools/` | ✅ | AV3A 转码 / ncmdump 解密 |
@@ -335,7 +335,7 @@ npm config set registry https://registry.npmmirror.com
 1. **frpc.exe 被 Defender 误杀** — 已将 `D:\fake_yuki` 加入排除项
 2. **音乐文件不入 Git** — `music-files/` 在 `.gitignore` 中
 3. **服务器凭证不入 Git** — `server/server.env` 和 `server/keys/` 在 `.gitignore` 中
-4. **导航站独立仓库** — `apps/nav/` 有自己的 Git 仓库，不跟主仓库混合
+4. **导航站独立仓库** — `apps/bookmarks/` 有自己的 Git 仓库，不跟主仓库混合
 5. **换设备恢复** — `git clone git@github.com:Yuki-C-d/fake_yuki.git` + 拷入 music-files/ + tools/*.exe + server/keys/
 
 ---

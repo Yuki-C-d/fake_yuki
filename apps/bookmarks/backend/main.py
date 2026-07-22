@@ -4,7 +4,7 @@ import os
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from apps.nav.backend import models
+from apps.bookmarks.backend import models
 
 
 class BookmarkIn(BaseModel):

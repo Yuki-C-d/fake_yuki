@@ -1,5 +1,5 @@
 import sqlite3
-from apps.nav.backend import config
+from apps.bookmarks.backend import config
 
 
 def get_conn():
