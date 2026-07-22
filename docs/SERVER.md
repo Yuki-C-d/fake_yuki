@@ -1,6 +1,6 @@
 # ☁️ fake_yuki 服务器文档
 
-> 最后更新: 2026-07-21
+> 最后更新: 2026-07-22
 
 ---
 
@@ -74,6 +74,7 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 |------|------|----------|----------|
 | **frps** | ✅ active | `systemctl {start\|stop\|restart\|status} frps` | ✅ |
 | **fake-yuki-music** | ✅ active | FastAPI 音乐站 (端口 8080) | ✅ |
+| **fake-star-nav** | ✅ active | FastAPI 书签站 (端口 8081) | ✅ |
 | **ncmapi** | ✅ active | NeteaseCloudMusicApi (端口 3000) | ✅ |
 | **SSH** | ✅ active | `systemctl {start\|stop\|restart} sshd` | ✅ |
 | **OpenClaw node** | ⚠️ 手动启动 | 见下方 | ❌ |
@@ -208,4 +209,4 @@ rm /tmp/node.tar.xz
 
 ---
 
-*本文档涵盖截至 2026-07-21 的所有服务器配置。*
+*本文档涵盖截至 2026-07-22 的所有服务器配置。*
