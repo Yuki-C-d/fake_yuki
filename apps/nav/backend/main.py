@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+import os
+from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from apps.nav.backend import models
@@ -27,6 +28,14 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 def index():
     with open("apps/nav/frontend/index.html", encoding="utf-8") as f:
         return HTMLResponse(f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+
+
+@app.get("/wallpaper.jpg")
+def wallpaper():
+    path = "apps/nav/frontend/wallpaper.jpg"
+    if os.path.exists(path):
+        return FileResponse(path, headers={"Cache-Control": "public, max-age=86400"})
+    return HTMLResponse("", status_code=404)
 
 
 @app.get("/api/bookmarks")
