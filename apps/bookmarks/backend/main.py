@@ -27,7 +27,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 @app.get("/")
 def index():
     with open("apps/nav/frontend/index.html", encoding="utf-8") as f:
-        return HTMLResponse(f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+        return HTMLResponse(f.read(), headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/wallpaper.jpg")
