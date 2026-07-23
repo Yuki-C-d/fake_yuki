@@ -629,8 +629,9 @@ function updateNowPlaying(track, source) {
     <div class="title">${esc(track.title || '未知')}</div>
     <div class="artist">${esc(track.artist || '')} ${sourceBadge(source)}</div>`;
   bottomTrackName.textContent = (track.title || '未知') + ' — ' + (track.artist || '') + badge;
-  // Sync to localStorage for cross-tab player
-  try { localStorage.setItem('yuki_now_playing', JSON.stringify({title:track.title||'',artist:track.artist||'',source:source,id:track.id,time:Date.now()})); } catch(e){}
+  // Sync to server for cross-origin vinyl player
+  var cover = track.cover || track.picUrl || (track.al||{}).picUrl || '';
+  try { fetch('/api/now-playing', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:track.title||'',artist:track.artist||'',source:source,id:track.id,time:Date.now(),cover:cover})}); } catch(e){}
 }
 function sourceBadge(src){ return src===SOURCE.LOCAL ? '<span class=\"source-badge local\">本地</span>' : '<span class=\"source-badge ncm\">网易云</span>'; }
 

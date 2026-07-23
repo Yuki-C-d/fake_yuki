@@ -541,6 +541,25 @@ def reorder_playlist_songs(playlist_id: int, body: PlaylistReorder):
 
 
 # ═══════════════════════════════════════
+#  跨站点迷你播放器状态
+# ═══════════════════════════════════════
+
+_now_playing: dict = {}
+
+
+@app.get("/api/now-playing")
+def get_now_playing():
+    return _now_playing
+
+
+@app.post("/api/now-playing")
+def set_now_playing(body: dict):
+    global _now_playing
+    _now_playing = {"title": body.get("title", ""), "artist": body.get("artist", ""), "source": body.get("source", ""), "id": body.get("id", ""), "time": body.get("time", 0), "cover": body.get("cover", "")}
+    return {"status": "ok"}
+
+
+# ═══════════════════════════════════════
 #  网易云音乐 API 代理
 # ═══════════════════════════════════════
 

@@ -366,23 +366,32 @@ body::before {
   background: var(--c-text-lt);
 }
 
-/* ===== Mini Player ===== */
-.mini-player {
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 9998;
-  display: flex; align-items: center; gap: var(--sp2);
-  background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.5); border-radius: 20px;
-  padding: 2px var(--sp3) 2px var(--sp2); max-width: 600px; width: auto;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+/* ===== Vinyl Player ===== */
+.vinyl-player { position: fixed; top: 20px; right: 20px; z-index: 9998; width: 120px; height: 120px; cursor: grab; }
+.vinyl-player:active { cursor: grabbing; }
+.vinyl-disc {
+  width: 120px; height: 120px; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 0 0 3px rgba(255,255,255,0.3);
+  background: #1a1a2e; animation: spin 4s linear infinite; animation-play-state: paused;
 }
-.mp-info { min-width: 0; margin-right: var(--sp); }
-.mp-title { font-size: 0.8rem; font-weight: 600; color: var(--c-blue-dk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.mp-artist { font-size: 0.68rem; color: var(--c-text-lt); }
-.mp-ctrl { display: flex; gap: 4px; }
-.mp-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(74,122,154,0.15); background: rgba(255,255,255,0.5); color: var(--c-blue-dk); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.mp-btn:hover { border-color: var(--c-blue); color: var(--c-blue); }
-.mp-play { background: var(--c-warm); border-color: var(--c-warm); color: #fff; }
-@media (max-width: 768px) { .mini-player { left: 8px; right: 8px; transform: none; } }
+.vinyl-disc.playing { animation-play-state: running; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.vinyl-cover { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.vinyl-hover {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.25s; pointer-events: none;
+}
+.vinyl-player:hover .vinyl-hover { opacity: 1; pointer-events: auto; }
+.vinyl-info { text-align: center; margin-bottom: 4px; max-width: 100px; }
+.vinyl-title { font-size: 0.6rem; font-weight: 600; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vinyl-artist { font-size: 0.5rem; color: rgba(255,255,255,0.7); }
+.vinyl-ctrl { display: flex; gap: 2px; }
+.vinyl-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.vinyl-btn:hover { background: rgba(255,255,255,0.3); }
+.vinyl-play { background: var(--c-warm); border-color: var(--c-warm); }
+@media (max-width: 768px) { .vinyl-player { width: 90px; height: 90px; top: 10px; right: 10px; } .vinyl-disc { width: 90px; height: 90px; } }
 
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
@@ -453,16 +462,18 @@ body::before {
 
 </div>
 
-<!-- ===== Mini Player ===== -->
-<div class="mini-player" id="miniPlayer" style="display:none">
-  <div class="mp-info">
-    <span class="mp-title" id="mpTitle">—</span>
-    <span class="mp-artist" id="mpArtist"></span>
+<!-- ===== Vinyl Player ===== -->
+<div class="vinyl-player" id="vinylPlayer" style="display:none">
+  <div class="vinyl-disc" id="vinylDisc">
+    <img class="vinyl-cover" id="vinylCover" src="" alt="">
   </div>
-  <div class="mp-ctrl">
-    <button class="mp-btn" id="mpPrev" title="上一首">⏮</button>
-    <button class="mp-btn mp-play" id="mpPlay" title="播放/暂停">▶</button>
-    <button class="mp-btn" id="mpNext" title="下一首">⏭</button>
+  <div class="vinyl-hover" id="vinylHover">
+    <div class="vinyl-info"><span class="vinyl-title" id="vinylTitle"></span><span class="vinyl-artist" id="vinylArtist"></span></div>
+    <div class="vinyl-ctrl">
+      <button class="vinyl-btn" id="vinylPrev">⏮</button>
+      <button class="vinyl-btn vinyl-play" id="vinylPlay">▶</button>
+      <button class="vinyl-btn" id="vinylNext">⏭</button>
+    </div>
   </div>
 </div>
 
@@ -480,70 +491,36 @@ body::before {
 </div>
 
 <script>
-var miniAudio = new Audio();
-var mpVisible = false;
-function showMiniPlayer(info) {
-  document.getElementById('miniPlayer').style.display = 'flex';
-  document.getElementById('mpTitle').textContent = info.title || '—';
-  document.getElementById('mpArtist').textContent = info.artist || '';
-  mpVisible = true;
-}
-function hideMiniPlayer() {
-  document.getElementById('miniPlayer').style.display = 'none';
-  mpVisible = false;
-}
-function updateMiniPlayBtn() {
-  document.getElementById('mpPlay').textContent = miniAudio.paused ? '▶' : '⏸';
-}
+// Vinyl player
+var vpAudio = new Audio(); var vpInfo = null; var VP_API = 'http://8.166.119.185:8080';
+function $(id){return document.getElementById(id)}
+var vpEl = $('vinylPlayer'), vpDisc = $('vinylDisc'), vpCover = $('vinylCover'),
+    vpTitle = $('vinylTitle'), vpArtist = $('vinylArtist'), vpPlay = $('vinylPlay');
 
-// Poll localStorage for now-playing state from music station
+// Poll now-playing
 setInterval(function(){
-  try {
-    var raw = localStorage.getItem('yuki_now_playing');
-    if (!raw) { if(mpVisible) hideMiniPlayer(); return; }
-    var info = JSON.parse(raw);
-    if (Date.now() - info.time > 600000) { hideMiniPlayer(); return; } // stale after 10min
-    showMiniPlayer(info);
-  } catch(e){}
-}, 2000);
+  fetch(VP_API+'/api/now-playing').then(function(r){return r.json()}).then(function(info){
+    if(!info.title){vpEl.style.display='none';return}
+    if(Date.now()-(info.time||0)>600000){vpEl.style.display='none';return}
+    vpEl.style.display='';vpTitle.textContent=info.title;vpArtist.textContent=info.artist||'';
+    if(vpInfo&&vpInfo.id===info.id)return;vpInfo=info;
+    vpCover.src=info.cover||'/default-vinyl.svg';
+    if(!vpAudio.src){vpAudio.src=VP_API+'/api/stream/'+info.id}
+    vpAudio.play().catch(function(){});vpDisc.classList.add('playing');
+  }).catch(function(){})
+},3000);
+vpAudio.addEventListener('play',function(){vpDisc.classList.add('playing');vpPlay.textContent='⏸'});
+vpAudio.addEventListener('pause',function(){vpDisc.classList.remove('playing');vpPlay.textContent='▶'});
+vpPlay.addEventListener('click',function(){vpAudio.paused?vpAudio.play():vpAudio.pause()});
 
-// Play/pause — stream from music API
-document.getElementById('mpPlay').addEventListener('click', function(){
-  if (!miniAudio.src) {
-    try {
-      var raw = localStorage.getItem('yuki_now_playing');
-      if (raw) {
-        var info = JSON.parse(raw);
-        var url = info.source === 'netease'
-          ? 'http://8.166.119.185:8080/api/ncm/song/' + info.id + '/url?level=standard'
-          : 'http://8.166.119.185:8080/api/stream/' + info.id;
-        miniAudio.src = url;
-      }
-    } catch(e){}
-  }
-  if (miniAudio.paused) { miniAudio.play().catch(function(){}); } else { miniAudio.pause(); }
-  updateMiniPlayBtn();
-});
-miniAudio.addEventListener('play', updateMiniPlayBtn);
-miniAudio.addEventListener('pause', updateMiniPlayBtn);
-
-// Next — just restart (simple approach)
-document.getElementById('mpNext').addEventListener('click', function(){
-  // Signal to music station tab to skip (if open)
-  localStorage.setItem('yuki_action', 'next');
-  setTimeout(function(){ localStorage.removeItem('yuki_action'); }, 500);
-  // Fallback: play first song
-  fetch('http://8.166.119.185:8080/api/songs').then(function(r){return r.json()}).then(function(songs){
-    if (songs.length) {
-      miniAudio.src = 'http://8.166.119.185:8080/api/stream/' + songs[0].id;
-      miniAudio.play();
-    }
-  });
-});
-document.getElementById('mpPrev').addEventListener('click', function(){
-  localStorage.setItem('yuki_action', 'prev');
-  setTimeout(function(){ localStorage.removeItem('yuki_action'); }, 500);
-});
+// Drag
+var dragging=false,dx=0,dy=0;
+vpEl.addEventListener('mousedown',function(e){if(e.target.closest('.vinyl-btn'))return;dragging=true;dx=e.clientX-vpEl.offsetLeft;dy=e.clientY-vpEl.offsetTop;e.preventDefault()});
+document.addEventListener('mousemove',function(e){if(!dragging)return;vpEl.style.left=(e.clientX-dx)+'px';vpEl.style.top=(e.clientY-dy)+'px';vpEl.style.right='auto'});
+document.addEventListener('mouseup',function(){dragging=false});
+// Save position
+vpEl.addEventListener('mouseup',function(){try{localStorage.setItem('vinyl_pos',JSON.stringify({left:vpEl.style.left,top:vpEl.style.top,right:vpEl.style.right}))}catch(e){}});
+try{var pos=JSON.parse(localStorage.getItem('vinyl_pos'));if(pos){vpEl.style.left=pos.left;vpEl.style.top=pos.top;vpEl.style.right=pos.right||'auto'}}catch(e){}
 </script>
 </body>
 </html>
