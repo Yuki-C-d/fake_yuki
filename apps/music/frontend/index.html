@@ -122,6 +122,7 @@ body.mini .wallpaper, body.mini .hero, body.mini .footer { display: none; }
 body.mini .content { padding: var(--sp2); }
 body.mini .main-layout { flex-direction: column; }
 body.mini .sidebar { width: 100%; }
+body.mini .main-area { width: 100%; }
 body.mini .glass-card { padding: var(--sp2); margin-bottom: 0; border-radius: 0; }
 
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
@@ -713,7 +714,8 @@ setInterval(() => {
   }
 }, 60000);
 
-function renderSongView() { renderSongList(); updateLocalPlaylistNav(); }
+function renderSongView() { renderSongList(); updateLocalPlaylistNav(); if(document.body.classList.contains('mini')) document.getElementById('songList').scrollIntoView({behavior:'smooth'}); }
+function renderNcmView() { renderNcmTracks(); if(document.body.classList.contains('mini')) document.getElementById('songList').scrollIntoView({behavior:'smooth'}); }
 function renderNcmView() { renderNcmTracks(); }
 
 // ═══════════════════════════════════════════════
