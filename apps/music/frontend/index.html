@@ -324,18 +324,16 @@ audio { display: none; }
     <div class="main-layout">
       <!-- Sidebar -->
       <div class="sidebar" id="sidebar">
+        <div class="sidebar-section" id="sectionNcm" style="display:none;">
+          <div id="ncmUserArea"></div>
+        </div>
         <div class="sidebar-section" id="sectionLocal">
-          <div class="sidebar-title">我的歌单</div>
           <ul class="playlist-list" id="localPlaylistNav">
-            <li class="active" data-pl-id="" data-pl-name="全部歌曲">📁 全部歌曲 <span class="count" id="localCount">0</span></li>
+            <li class="active" data-pl-id="" data-pl-name="本地歌曲">📁 本地歌曲 <span class="count" id="localCount">0</span></li>
           </ul>
           <button class="ncm-login-btn" id="btnNewPlaylist" style="margin-top:8px;border-color:rgba(74,122,154,0.3);color:var(--c-blue-dk);background:rgba(74,122,154,0.04);">＋ 新建歌单</button>
         </div>
-        <div class="sidebar-section" id="sectionNcm" style="display:none;">
-          <div class="sidebar-title">网易云音乐</div>
-          <div id="ncmUserArea"></div>
-          <ul class="playlist-list" id="ncmPlaylistNav"></ul>
-        </div>
+        <ul class="playlist-list" id="ncmPlaylistNav" style="display:none;"></ul>
       </div>
 
       <!-- Main Area -->
@@ -825,11 +823,13 @@ async function checkNcmStatus() {
       ncmLoggedIn = true;
       ncmUser = d.data || d;
       sectionNcm.style.display = '';
+      document.getElementById('ncmPlaylistNav').style.display = '';
       renderNcmUser();
       await loadNcmPlaylists();
     } else {
       ncmLoggedIn = false;
       sectionNcm.style.display = '';
+      document.getElementById('ncmPlaylistNav').style.display = 'none';
       renderNcmUser();
     }
   } catch (e) {
