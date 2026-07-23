@@ -574,19 +574,12 @@ function toast(msg) {
 // ═══════════════════════════════════════════════
 //  Player
 // ═══════════════════════════════════════════════
-var displayedTracks = []; // currently visible tracks (local, NCM, or search results)
+var displayedTracks = [];
+var activeQueue = [];  // locked queue for prev/next, only changes on explicit play
 function getQueue() {
-  // Return whatever is currently visible
+  if (activeQueue.length) return activeQueue;
   if (displayedTracks.length) return displayedTracks;
-  var q = searchInput.value.trim().toLowerCase();
-  var pool = songs;
-  if (currentPlaylistId !== null) {
-    var ids = playlistSongIds.get(currentPlaylistId) || new Set();
-    pool = songs.filter(function(s){ return ids.has(s.id); });
-  }
-  if (q) pool = pool.filter(function(s){ return (s.title+s.artist+(s.album||'')).toLowerCase().includes(q); });
-  displayedTracks = pool;
-  return pool;
+  return [];
 }
 
 async function playTrack(track, source) {
@@ -610,6 +603,10 @@ async function playTrack(track, source) {
     } catch (e) { toast('获取链接失败'); return; }
   }
 
+  // Lock queue on manual play, keep on auto-advance
+  if (!track._auto) {
+    activeQueue = displayedTracks.length ? displayedTracks.slice() : [track];
+  }
   try { await player.play(); } catch (e) {}
   updateNowPlaying(track, source);
   updatePlayBtn();
@@ -650,17 +647,17 @@ function prev() {
   var q = getQueue(); if (!q.length) return;
   var idx = q.findIndex(function(s){return s.id==currentTrackId;});
   var t = idx > 0 ? q[idx-1] : q[q.length-1];
-  playTrack(t, trackSource(t));
+  t._auto = true; playTrack(t, trackSource(t));
 }
 function next() {
   var q = getQueue(); if (!q.length) return;
   var idx = q.findIndex(function(s){return s.id==currentTrackId;});
   var t = idx < q.length-1 ? q[idx+1] : q[0];
-  playTrack(t, trackSource(t));
+  t._auto = true; playTrack(t, trackSource(t));
 }
 function togglePlay() {
   if (player.paused) {
-    if (!player.src) { const q = getQueue(); if (q.length) playTrack(q[0], currentTrackSource); }
+    if (!player.src) { var q = getQueue(); if (q.length) playTrack(q[0], currentTrackSource); }
     else player.play().catch(() => {});
   } else player.pause();
 }
@@ -709,8 +706,8 @@ window.addEventListener('storage', function(e){
 // URL expiry check
 setInterval(() => {
   if (ncmUrlExpires && Date.now() > ncmUrlExpires - 2*60000 && currentTrackSource === SOURCE.NETEASE) {
-    const t = ncmTracks.find(s => s.id == currentTrackId);
-    if (t) playTrack(t, SOURCE.NETEASE);  // refresh URL
+    var t = ncmTracks.find(function(s){return s.id == currentTrackId;});
+    if (t) { t._auto = true; playTrack(t, SOURCE.NETEASE); }
   }
 }, 60000);
 
