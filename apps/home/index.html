@@ -506,7 +506,7 @@ setInterval(function(){
     if(vpInfo&&vpInfo.id===info.id)return;vpInfo=info;
     vpCover.src=info.cover||'/default-vinyl.svg';
     if(!vpAudio.src){vpAudio.src=VP_API+'/api/stream/'+info.id}
-    vpAudio.play().catch(function(){});vpDisc.classList.add('playing');
+    vpDisc.classList.add('playing');
   }).catch(function(){})
 },3000);
 vpAudio.addEventListener('play',function(){vpDisc.classList.add('playing');vpPlay.textContent='⏸'});

@@ -144,7 +144,7 @@ setInterval(function(){
     if(vpInfo&&vpInfo.id===info.id)return;vpInfo=info;
     vpc.src=info.cover||VP_API+'/default-vinyl.svg';
     if(!vpAudio.src){vpAudio.src=VP_API+'/api/stream/'+info.id}
-    vpAudio.play().catch(function(){});vpd.classList.add('playing');
+    vpd.classList.add('playing');
   }).catch(function(){})
 },3000);
 vpAudio.addEventListener('play',function(){vpd.classList.add('playing');vpb.textContent='⏸'});
