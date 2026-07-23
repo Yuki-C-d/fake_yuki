@@ -150,7 +150,9 @@ function render(){
 function switchTag(tag){activeTag=tag;render()}
 function addTag(){
   var name=prompt('新分类名称：');if(!name||!name.trim())return;
-  activeTag=name.trim();render();
+  activeTag=name.trim();
+  document.getElementById('editNewTag').value=activeTag;
+  openAdd();
 }
 
 function openAdd(){
