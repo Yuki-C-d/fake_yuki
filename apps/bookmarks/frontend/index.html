@@ -151,21 +151,21 @@ function switchTag(tag){activeTag=tag;render()}
 function addTag(){
   var name=prompt('新分类名称：');if(!name||!name.trim())return;
   activeTag=name.trim();
-  document.getElementById('editNewTag').value=activeTag;
-  openAdd();
+  openAdd(name.trim());
 }
 
-function openAdd(){
-  editId=null;
+function openAdd(newTag){
+  editId=null;newTag=newTag||'';
   document.getElementById('editTitle').textContent='添加书签';
   document.getElementById('editName').value='';
   document.getElementById('editUrl').value='';
   document.getElementById('editIcon').value='';
-  document.getElementById('editNewTag').value='';
+  document.getElementById('editNewTag').value=newTag;
   document.getElementById('btnDelete').style.display='none';
   var sel=document.getElementById('editTag');sel.innerHTML='';
   tags().forEach(function(x){sel.innerHTML+='<option value="'+esc(x)+'">'+esc(x)+'</option>';});
-  sel.value=activeTag||'';
+  if(newTag){sel.innerHTML+='<option value="'+esc(newTag)+'" selected>'+esc(newTag)+' (新)</option>';}
+  sel.value=newTag||activeTag||'';
   document.getElementById('editModal').style.display='flex';
 }
 function openEdit(id){
