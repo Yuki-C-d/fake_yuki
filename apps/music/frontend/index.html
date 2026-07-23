@@ -117,9 +117,12 @@ body::before {
   border-radius: 3px; transition: width 0.2s linear;
 }
 
-/* Mini mode: hide hero + wallpaper */
+/* Mini mode */
 body.mini .wallpaper, body.mini .hero, body.mini .footer { display: none; }
-body.mini .content { padding-top: var(--sp4); }
+body.mini .content { padding: var(--sp2); }
+body.mini .main-layout { flex-direction: column; }
+body.mini .sidebar { width: 100%; }
+body.mini .glass-card { padding: var(--sp2); margin-bottom: 0; border-radius: 0; }
 
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
 .player-info { flex: 1; min-width: 0; }
