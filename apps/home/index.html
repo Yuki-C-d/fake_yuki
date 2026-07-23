@@ -366,6 +366,24 @@ body::before {
   background: var(--c-text-lt);
 }
 
+/* ===== Mini Player ===== */
+.mini-player {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 9998;
+  display: flex; align-items: center; gap: var(--sp2);
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.5); border-radius: 20px;
+  padding: 2px var(--sp3) 2px var(--sp2); max-width: 600px; width: auto;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+.mp-info { min-width: 0; margin-right: var(--sp); }
+.mp-title { font-size: 0.8rem; font-weight: 600; color: var(--c-blue-dk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.mp-artist { font-size: 0.68rem; color: var(--c-text-lt); }
+.mp-ctrl { display: flex; gap: 4px; }
+.mp-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(74,122,154,0.15); background: rgba(255,255,255,0.5); color: var(--c-blue-dk); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.mp-btn:hover { border-color: var(--c-blue); color: var(--c-blue); }
+.mp-play { background: var(--c-warm); border-color: var(--c-warm); color: #fff; }
+@media (max-width: 768px) { .mini-player { left: 8px; right: 8px; transform: none; } }
+
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
   .hero-inner h1 { font-size: 2.2rem; }
@@ -435,6 +453,19 @@ body::before {
 
 </div>
 
+<!-- ===== Mini Player ===== -->
+<div class="mini-player" id="miniPlayer" style="display:none">
+  <div class="mp-info">
+    <span class="mp-title" id="mpTitle">—</span>
+    <span class="mp-artist" id="mpArtist"></span>
+  </div>
+  <div class="mp-ctrl">
+    <button class="mp-btn" id="mpPrev" title="上一首">⏮</button>
+    <button class="mp-btn mp-play" id="mpPlay" title="播放/暂停">▶</button>
+    <button class="mp-btn" id="mpNext" title="下一首">⏭</button>
+  </div>
+</div>
+
 <!-- ===== Footer ===== -->
 <div class="footer">
   <div class="divider">
@@ -448,5 +479,71 @@ body::before {
   <br><small>Background art from Pixiv</small>
 </div>
 
+<script>
+var miniAudio = new Audio();
+var mpVisible = false;
+function showMiniPlayer(info) {
+  document.getElementById('miniPlayer').style.display = 'flex';
+  document.getElementById('mpTitle').textContent = info.title || '—';
+  document.getElementById('mpArtist').textContent = info.artist || '';
+  mpVisible = true;
+}
+function hideMiniPlayer() {
+  document.getElementById('miniPlayer').style.display = 'none';
+  mpVisible = false;
+}
+function updateMiniPlayBtn() {
+  document.getElementById('mpPlay').textContent = miniAudio.paused ? '▶' : '⏸';
+}
+
+// Poll localStorage for now-playing state from music station
+setInterval(function(){
+  try {
+    var raw = localStorage.getItem('yuki_now_playing');
+    if (!raw) { if(mpVisible) hideMiniPlayer(); return; }
+    var info = JSON.parse(raw);
+    if (Date.now() - info.time > 600000) { hideMiniPlayer(); return; } // stale after 10min
+    showMiniPlayer(info);
+  } catch(e){}
+}, 2000);
+
+// Play/pause — stream from music API
+document.getElementById('mpPlay').addEventListener('click', function(){
+  if (!miniAudio.src) {
+    try {
+      var raw = localStorage.getItem('yuki_now_playing');
+      if (raw) {
+        var info = JSON.parse(raw);
+        var url = info.source === 'netease'
+          ? 'http://8.166.119.185:8080/api/ncm/song/' + info.id + '/url?level=standard'
+          : 'http://8.166.119.185:8080/api/stream/' + info.id;
+        miniAudio.src = url;
+      }
+    } catch(e){}
+  }
+  if (miniAudio.paused) { miniAudio.play().catch(function(){}); } else { miniAudio.pause(); }
+  updateMiniPlayBtn();
+});
+miniAudio.addEventListener('play', updateMiniPlayBtn);
+miniAudio.addEventListener('pause', updateMiniPlayBtn);
+
+// Next — just restart (simple approach)
+document.getElementById('mpNext').addEventListener('click', function(){
+  // Signal to music station tab to skip (if open)
+  localStorage.setItem('yuki_action', 'next');
+  setTimeout(function(){ localStorage.removeItem('yuki_action'); }, 500);
+  // Fallback: play first song
+  fetch('http://8.166.119.185:8080/api/songs').then(function(r){return r.json()}).then(function(songs){
+    if (songs.length) {
+      miniAudio.src = 'http://8.166.119.185:8080/api/stream/' + songs[0].id;
+      miniAudio.play();
+    }
+  });
+});
+document.getElementById('mpPrev').addEventListener('click', function(){
+  localStorage.setItem('yuki_action', 'prev');
+  setTimeout(function(){ localStorage.removeItem('yuki_action'); }, 500);
+});
+</script>
 </body>
 </html>

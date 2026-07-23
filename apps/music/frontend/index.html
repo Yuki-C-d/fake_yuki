@@ -629,6 +629,8 @@ function updateNowPlaying(track, source) {
     <div class="title">${esc(track.title || '未知')}</div>
     <div class="artist">${esc(track.artist || '')} ${sourceBadge(source)}</div>`;
   bottomTrackName.textContent = (track.title || '未知') + ' — ' + (track.artist || '') + badge;
+  // Sync to localStorage for cross-tab player
+  try { localStorage.setItem('yuki_now_playing', JSON.stringify({title:track.title||'',artist:track.artist||'',source:source,id:track.id,time:Date.now()})); } catch(e){}
 }
 function sourceBadge(src){ return src===SOURCE.LOCAL ? '<span class=\"source-badge local\">本地</span>' : '<span class=\"source-badge ncm\">网易云</span>'; }
 
@@ -687,6 +689,14 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
   else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+
+// Listen for cross-tab commands from main site
+window.addEventListener('storage', function(e){
+  if (e.key === 'yuki_action') {
+    if (e.newValue === 'next') next();
+    else if (e.newValue === 'prev') prev();
+  }
 });
 
 // URL expiry check
