@@ -117,6 +117,10 @@ body::before {
   border-radius: 3px; transition: width 0.2s linear;
 }
 
+/* Mini mode: hide hero + wallpaper */
+body.mini .wallpaper, body.mini .hero, body.mini .footer { display: none; }
+body.mini .content { padding-top: var(--sp4); }
+
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
 .player-info { flex: 1; min-width: 0; }
 .player-info .title { font-size: 1rem; font-weight: 600; color: var(--c-blue-dk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1215,6 +1219,9 @@ function showAddMenu(e, songId, source) {
   ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
   ctxMenu.style.top = Math.min(e.clientY, window.innerHeight - 250) + 'px';
 }
+
+// Mini mode: hide hero+wallpaper when ?mini=1
+if (location.search.includes('mini=1')) { document.body.classList.add('mini'); }
 
 // ═══════════════════════════════════════════════
 //  Init
