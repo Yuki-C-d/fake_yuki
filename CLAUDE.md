@@ -32,10 +32,12 @@ python -m http.server 3000
 - **服务器**: 阿里云 ECS 8.166.119.185 (Ubuntu 22.04)
 - **SSH**: `server/keys/id_ed25519`
 - **ECS 服务**: 
-  - `fake-yuki-music` — FastAPI :8080
-  - `ncmapi` — NeteaseCloudMusicApi :3000 (网易云代理)
+  - `caddy` — 反向代理 + HTTPS（80/443）
+  - `fake-yuki-music` — FastAPI :8080（127.0.0.1）
+  - `fake-star-nav` — FastAPI 书签 :8081（127.0.0.1）
+  - `ncmapi` — NeteaseCloudMusicApi :3000（127.0.0.1）
   - `frps` — frp 服务端
-- **外网**: `http://8.166.119.185:8080`
+- **外网**: `https://fake-star.xyz` / `https://music.fake-star.xyz` / `https://bookmarks.fake-star.xyz`
 
 ## 查看项目
 

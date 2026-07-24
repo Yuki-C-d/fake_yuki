@@ -4,9 +4,5 @@ serverPort = 7000
 auth.token = "mv-frp-token-2026-07-10"
 auth.method = "token"
 
-[[proxies]]
-name = "gw-ws"
-type = "tcp"
-localIP = "127.0.0.1"
-localPort = 18789
-remotePort = 18790
+# OpenClaw 隧道已移除 (2026-07-24)
+# 需要新增隧道时在下方添加 [[proxies]] 段

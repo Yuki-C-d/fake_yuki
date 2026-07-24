@@ -52,7 +52,6 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | 8080 | TCP | (内部) | 音乐站 127.0.0.1（Caddy 反代） |
 | 8081 | TCP | (内部) | 书签站 127.0.0.1（Caddy 反代） |
 | 3000 | TCP | (内部) | NCM API 127.0.0.1 |
-| 18790 | TCP | OpenClaw WebSocket | ECS node ↔ 本地 Gateway |
 
 ---
 
@@ -63,7 +62,7 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | **frps** | v0.69.1 | 二进制下载 | `/opt/frp/frps` |
 | **Node.js** | v24.16.0 LTS | npmmirror 镜像 | `/usr/local/node-v24.16.0-linux-x64/` |
 | **npm** | 11.13.0 | 随 Node.js | — |
-| **OpenClaw** | v2026.6.11 | npm 全局安装 | `/usr/local/node-v24.16.0-linux-x64/bin/openclaw` |
+| **caddy** | v2.11.4 | apt 安装 | `/usr/bin/caddy` |
 | **Python** | 3.10.12 | 系统自带 | `/usr/bin/python3` |
 
 ### npm 源
@@ -83,20 +82,6 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | **ncmapi** | ✅ active | NeteaseCloudMusicApi (127.0.0.1:3000) | ✅ |
 | **caddy** | ✅ active | 反向代理 + HTTPS (80/443) | ✅ |
 | **SSH** | ✅ active | `systemctl {start\|stop\|restart} sshd` | ✅ |
-| **OpenClaw node** | ⚠️ 手动启动 | 见下方 | ❌ |
-
-### OpenClaw node 启动命令
-
-```bash
-# ECS 上执行
-OPENCLAW_GATEWAY_TOKEN=0daca09b2655e4aee5f686b59b9143f7428c5806dcfe5f66 \
-  nohup openclaw node run > /tmp/oc-node.log 2>&1 &
-
-# 停止
-pkill -f openclaw-node
-```
-
-> ⚠️ node 未配置 systemd 服务，服务器重启后需手动启动。
 
 ---
 
@@ -130,8 +115,7 @@ pkill -f openclaw-node
 
 | 名称 | 类型 | 本地端口 | 远程端口 | 用途 |
 |------|------|----------|----------|------|
-| music-vault | TCP | 8080 | 8080 | 音乐站（已停用，ECS 直跑） |
-| gw-ws | TCP | 18789 | 18790 | OpenClaw Gateway ↔ ECS Node |
+| (暂无活跃隧道) | — | — | — | OpenClaw 已移除 (2026-07-24) |
 
 ### 常用命令
 
@@ -201,7 +185,6 @@ rm /tmp/node.tar.xz
 | frps 挂了 | `ssh root@8.166.119.185 "systemctl status frps"` |
 | frpc 挂了 | 本地 `tasklist \| findstr frpc`，没有就手动启动 |
 | SSH 连不上 | 检查 `server/keys/id_ed25519` 文件是否在、阿里云安全组 22 端口是否开放 |
-| ECS node 离线 | `ssh root@8.166.119.185 "ps aux \| grep openclaw"`，必要时手动启动 |
 
 ---
 

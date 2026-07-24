@@ -227,15 +227,17 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | 端口 | 用途 |
 |------|------|
 | 22 | SSH |
+| 80 | HTTP（Caddy 自动跳转 HTTPS） |
+| 443 | HTTPS（Caddy TLS） |
 | 7000 | frp 控制 |
 | 7500 | frp 面板 (admin / musicvault2026) |
-| 8080 | 音乐站 |
-| 18790 | OpenClaw WebSocket |
 
-### frp 内网穿透
+### 反向代理
 
 ```
-外网 → 8.166.119.185:8080 → FastAPI 直跑 (ECS)
+外网 → Caddy(:443) → fake-star.xyz     → /opt/fake_yuki/apps/home/
+                    → music.fake-star.xyz    → 127.0.0.1:8080
+                    → bookmarks.fake-star.xyz → 127.0.0.1:8081
 ```
 
 | 组件 | 位置 | 管理 |
@@ -331,9 +333,7 @@ npm config set registry https://registry.npmmirror.com
 
 | 优先级 | 事项 |
 |--------|------|
-| ⭐ | 域名备案 → 绑 DNS，所有站挂到 fake-star.xyz |
-| ⭐ | 主站改为 ECS 托管（不再依赖 GitHub Pages） |
-| ⭐⭐ | 随手接后端（碎碎念 + 图片上传） |
+| ⭐⭐ | 随手记后端（碎碎念 + 图片上传） |
 | ⭐⭐ | 移动端适配 |
 | ⭐⭐ | 音乐站绑域名（备案后） |
 | ⭐⭐⭐ | 摄影站搭建 |
