@@ -1,0 +1,15 @@
+fake-star.xyz, www.fake-star.xyz {
+    root * /opt/fake_yuki/apps/home
+    file_server
+    encode zstd gzip
+}
+
+music.fake-star.xyz {
+    reverse_proxy 127.0.0.1:8080
+    encode zstd gzip
+}
+
+bookmarks.fake-star.xyz {
+    reverse_proxy 127.0.0.1:8081
+    encode zstd gzip
+}

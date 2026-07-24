@@ -26,13 +26,13 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/")
 def index():
-    with open("apps/nav/frontend/index.html", encoding="utf-8") as f:
+    with open("apps/bookmarks/frontend/index.html", encoding="utf-8") as f:
         return HTMLResponse(f.read(), headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/wallpaper.jpg")
 def wallpaper():
-    path = "apps/nav/frontend/wallpaper.jpg"
+    path = "apps/bookmarks/frontend/wallpaper.jpg"
     if os.path.exists(path):
         return FileResponse(path, headers={"Cache-Control": "public, max-age=86400"})
     return HTMLResponse("", status_code=404)

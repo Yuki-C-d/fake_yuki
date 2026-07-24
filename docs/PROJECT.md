@@ -1,7 +1,7 @@
 # fake_yuki 项目手册
 
 > 个人网站项目集合 — 此方 & Yuki ❄️  
-> 最后更新: 2026-07-23
+> 最后更新: 2026-07-24
 
 ---
 
@@ -9,14 +9,15 @@
 
 | 模块 | 路径 | 状态 | 说明 |
 |------|------|------|------|
-| 🏠 **个人主站** | `apps/home/` | 🔨 骨架搭建 | 站点入口，Hero + 功能卡片 + 随手记 |
+| 🏠 **个人主站** | `apps/home/` | ✅ 运行中 | 站点入口，Hero + 功能卡片 + 随手记 |
 | 🎵 音乐播放器 | `apps/music/` | ✅ 运行中 | 自建音乐云，浏览器听歌 |
 | 🔗 书签站 | `apps/bookmarks/` | ✅ 运行中 | ECS :8081 + SQLite，标签分类+增删改 |
 | 🎨 **设计系统** | `yuki_风格/` | ✅ **定稿** | **全站视觉规范，所有功能站风格统一依据** |
-| ☁️ 服务器 | `server/` | ✅ 运行中 | 阿里云 ECS + frp 内网穿透 |
+| ☁️ 服务器 | `server/` | ✅ 运行中 | 阿里云 ECS + Caddy 反代 + HTTPS |
 | 🔧 工具集 | `tools/` | ✅ | AV3A 转码 / ncmdump 解密 |
 
-**启动命令**: `cd D:\fake_yuki && python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080`
+**域名**: `https://fake-star.xyz`（ICP 已备案）
+**子域名**: `music.fake-star.xyz` / `bookmarks.fake-star.xyz`
 
 ---
 
@@ -149,10 +150,10 @@
 
 | 项目 | 详情 |
 |------|------|
-| 域名 | `https://fake-star.xyz`（备案后上线） |
+| 域名 | `https://fake-star.xyz`（ICP 已备案） |
 | 代码 | `apps/home/index.html` |
 | 风格 | yuki_风格（毛玻璃 / 噪点 / 青鸟 / 勿忘我） |
-| 状态 | 🔨 骨架搭建中 |
+| 状态 | ✅ 已上线（ECS + Caddy 静态托管） |
 
 ### 结构
 
@@ -160,12 +161,12 @@
 Hero 全屏壁纸 → 功能站入口卡片（3 栏毛玻璃）→ 随手记 → Footer
 ```
 
-### 预览
+### 访问
 
-```bash
-cd D:\fake_yuki\apps\home
-python -m http.server 3000
-# 浏览器打开 http://localhost:3000
+```
+https://fake-star.xyz        ← 主站
+https://music.fake-star.xyz   ← 音乐站（弹出窗）
+https://bookmarks.fake-star.xyz ← 书签站
 ```
 
 ---
@@ -324,6 +325,7 @@ npm config set registry https://registry.npmmirror.com
 | **2026-07-21** | ECS 宕机恢复；书签站 yuki_风格重设计；主站+书签+音乐三站风格统一 |
 | **2026-07-22** | 书签站重构：FastAPI+SQLite 后端，标签页切换+动画，增删改书签，ECS :8081 部署；apps/nav→apps/bookmarks 重命名 |
 | **2026-07-23** | 书签站新分类修复；音乐站队列逻辑修复（手动播放锁定，auto-advance 跟随）；STYLE_GUIDE 组件规范完善；跨站播放方案讨论（备案后统一架构） |
+| **2026-07-24** | 🎉 域名备案通过，DNS 切至 ECS；三站统一部署（Caddy 反代 + Let's Encrypt HTTPS）；主站上线 https://fake-star.xyz；端口收敛（8080/8081 仅本地监听）；书签站 nav→bookmarks 路径修正 |
 
 ### 下一步
 

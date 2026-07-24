@@ -1,6 +1,6 @@
 # ☁️ fake_yuki 服务器文档
 
-> 最后更新: 2026-07-23
+> 最后更新: 2026-07-24
 
 ---
 
@@ -45,9 +45,13 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | 端口 | 协议 | 用途 | 说明 |
 |------|------|------|------|
 | 22 | TCP | SSH | 服务器管理 |
+| 80 | TCP | HTTP | Caddy（自动跳转 HTTPS） |
+| 443 | TCP | HTTPS | Caddy TLS 终止 |
 | 7000 | TCP | frp 控制端口 | frpc ↔ frps 通信 |
 | 7500 | TCP | frp 管理面板 | 浏览器查看隧道状态 |
-| 8080 | TCP | 音乐站 | 外网访问 fake_yuki |
+| 8080 | TCP | (内部) | 音乐站 127.0.0.1（Caddy 反代） |
+| 8081 | TCP | (内部) | 书签站 127.0.0.1（Caddy 反代） |
+| 3000 | TCP | (内部) | NCM API 127.0.0.1 |
 | 18790 | TCP | OpenClaw WebSocket | ECS node ↔ 本地 Gateway |
 
 ---
@@ -74,8 +78,10 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 |------|------|----------|----------|
 | **frps** | ✅ active | `systemctl {start\|stop\|restart\|status} frps` | ✅ |
 | **fake-yuki-music** | ✅ active | FastAPI 音乐站 (端口 8080) | ✅ |
-| **fake-star-nav** | ✅ active | FastAPI 书签站 (端口 8081) | ✅ |
-| **ncmapi** | ✅ active | NeteaseCloudMusicApi (端口 3000) | ✅ |
+| **fake-star-nav** | ✅ active | FastAPI 书签站 (127.0.0.1:8081) | ✅ |
+| **frps** | ✅ active | frp 服务端 | ✅ |
+| **ncmapi** | ✅ active | NeteaseCloudMusicApi (127.0.0.1:3000) | ✅ |
+| **caddy** | ✅ active | 反向代理 + HTTPS (80/443) | ✅ |
 | **SSH** | ✅ active | `systemctl {start\|stop\|restart} sshd` | ✅ |
 | **OpenClaw node** | ⚠️ 手动启动 | 见下方 | ❌ |
 
