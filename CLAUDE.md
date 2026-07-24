@@ -1,6 +1,6 @@
 # fake_yuki
 
-此方的个人网站项目集合。（最后更新: 2026-07-23）
+此方的个人网站项目集合。（最后更新: 2026-07-25）
 
 ## 目录结构
 
@@ -21,6 +21,10 @@ docs/           - 📄 项目文档
 # 音乐站
 cd D:\fake_yuki
 python -m uvicorn apps.music.backend.main:app --host 0.0.0.0 --port 8080
+
+# 书签站
+cd D:\fake_yuki
+python -m uvicorn apps.bookmarks.backend.main:app --host 0.0.0.0 --port 8081
 
 # 主站（本地预览）
 cd D:\fake_yuki\apps\home
@@ -48,4 +52,4 @@ python -m http.server 3000
 
 ## 记忆文件
 
-- `.claude/memory/MEMORY.md` — 项目记忆索引
+- `C:\Users\31848\.claude\projects\D--fake-yuki\memory\MEMORY.md` — 项目记忆索引

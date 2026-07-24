@@ -1,6 +1,6 @@
 # ☁️ fake_yuki 服务器文档
 
-> 最后更新: 2026-07-24
+> 最后更新: 2026-07-25
 
 ---
 
@@ -75,27 +75,25 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 
 | 服务 | 状态 | 管理方式 | 开机自启 |
 |------|------|----------|----------|
-| **frps** | ✅ active | `systemctl {start\|stop\|restart\|status} frps` | ✅ |
-| **fake-yuki-music** | ✅ active | FastAPI 音乐站 (端口 8080) | ✅ |
+| **fake-yuki-music** | ✅ active | FastAPI 音乐站 (127.0.0.1:8080) | ✅ |
 | **fake-star-nav** | ✅ active | FastAPI 书签站 (127.0.0.1:8081) | ✅ |
-| **frps** | ✅ active | frp 服务端 | ✅ |
 | **ncmapi** | ✅ active | NeteaseCloudMusicApi (127.0.0.1:3000) | ✅ |
 | **caddy** | ✅ active | 反向代理 + HTTPS (80/443) | ✅ |
+| **frps** | ✅ active | frp 服务端 | ✅ |
 | **SSH** | ✅ active | `systemctl {start\|stop\|restart} sshd` | ✅ |
 
 ---
 
-## 6. frp 内网穿透
-
-### 架构
+## 6. Web 访问架构
 
 ```
-外网请求
+外网请求 (HTTPS)
     │
     ▼
-8.166.119.185:8080 (阿里云 ECS)
-    │
-    ▼ FastAPI 直跑 (systemd: fake-yuki-music)
+Caddy (:443) 反向代理
+    ├── fake-star.xyz        → /opt/fake_yuki/apps/home/
+    ├── music.fake-star.xyz    → 127.0.0.1:8080
+    └── bookmarks.fake-star.xyz → 127.0.0.1:8081
 ```
 
 ### frps 配置（服务器端）
@@ -180,7 +178,7 @@ rm /tmp/node.tar.xz
 
 | 问题 | 排查方法 |
 |------|----------|
-| 外网访问不了音乐站 | `curl http://8.166.119.185:8080/api/songs` |
+| 外网访问不了音乐站 | `curl https://music.fake-star.xyz/api/songs` |
 | frp 隧道断了 | 浏览器打开 `http://8.166.119.185:7500` 查看 |
 | frps 挂了 | `ssh root@8.166.119.185 "systemctl status frps"` |
 | frpc 挂了 | 本地 `tasklist \| findstr frpc`，没有就手动启动 |
@@ -194,8 +192,8 @@ rm /tmp/node.tar.xz
 |------|------|------|
 | 阿里云 ECS 经济型 e | 99 元 | 每年 |
 | frp 隧道 | 免费 | — |
-| 域名（待购） | 0 元 | 暂无 |
+| 域名 fake-star.xyz | 约 60 元 | 每年 |
 
 ---
 
-*本文档涵盖截至 2026-07-23 的所有服务器配置。*
+*本文档涵盖截至 2026-07-25 的所有服务器配置。*

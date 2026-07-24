@@ -1,7 +1,7 @@
 # fake_yuki 项目手册
 
 > 个人网站项目集合 — 此方 & Yuki ❄️  
-> 最后更新: 2026-07-24
+> 最后更新: 2026-07-25
 
 ---
 
@@ -55,7 +55,7 @@
 | 前端 | 纯 HTML + JS（yuki_风格 玻璃童话） |
 | 音源 | 本地文件 + 网易云音乐（扫码登录流播放） |
 | 本地地址 | `http://localhost:8080` |
-| 外网地址 | `http://8.166.119.185:8080` |
+| 外网地址 | `https://music.fake-star.xyz` |
 | API 文档 | `http://localhost:8080/docs` |
 
 ### 数据库
@@ -175,7 +175,7 @@ https://bookmarks.fake-star.xyz ← 书签站
 
 | 项目 | 详情 |
 |------|------|
-| 地址 | `http://8.166.119.185:8081` |
+| 地址 | `https://bookmarks.fake-star.xyz` |
 | 后端 | FastAPI + SQLite (`apps/bookmarks/data/nav.db`) |
 | 前端 | yuki_风格 SPA：标签页切换 + fadeSlide 动画 + 增删改 |
 | 部署 | ECS systemd `fake-star-nav`，开机自启 |
@@ -335,7 +335,6 @@ npm config set registry https://registry.npmmirror.com
 |--------|------|
 | ⭐⭐ | 随手记后端（碎碎念 + 图片上传） |
 | ⭐⭐ | 移动端适配 |
-| ⭐⭐ | 音乐站绑域名（备案后） |
 | ⭐⭐⭐ | 摄影站搭建 |
 | 💤 | 用户认证 / Agent 接入 |
 
@@ -355,9 +354,9 @@ npm config set registry https://registry.npmmirror.com
 
 | 文档 | 内容 | 位置 |
 |------|------|------|
-| 旧 README | music-vault 原始方案 | `docs/archive/README-old.md` |
-| 旧 PROGRESS | 开发日记（踩坑记录） | `docs/archive/PROGRESS-old.md` |
-| 旧 DEV_GUIDE | 操作手册（详细版） | `docs/archive/DEV_GUIDE-old.html` |
+| 旧 README | music-vault 原始方案 | `docs/archive/README.md` |
+| 旧 PROGRESS | 开发日记（踩坑记录） | `docs/archive/PROGRESS.md` |
+| 旧 DEV_GUIDE | 操作手册（详细版） | `docs/archive/DEV_GUIDE.html` |
 | 服务器文档 | ECS/frp 详细配置 | `docs/SERVER.md`（保留不归档） |
 
 ---
