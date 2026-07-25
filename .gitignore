@@ -32,6 +32,10 @@ server/frpc/frpc.log
 # 本地配置（不共用）
 .claude/settings.local.json
 
+# MCP 工具临时文件
+.playwright-mcp/
+*-screenshot.png
+
 # 服务器凭证 & 密钥
 server/server.env
 server/keys/
