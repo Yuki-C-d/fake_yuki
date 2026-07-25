@@ -125,64 +125,55 @@ body.mini .sidebar { width: 100%; }
 body.mini .main-area { width: 100%; }
 body.mini .glass-card { padding: var(--sp2); margin-bottom: 0; border-radius: 0; }
 
-/* ═══════════════════ Vinyl standalone mode ═══════════════════ */
-body.vinyl-mode {
-  background: radial-gradient(ellipse at center, #1e1e30 0%, #0a0a16 100%);
-  display: flex; align-items: center; justify-content: center;
-  height: 100vh; overflow: hidden;
-  -webkit-app-region: drag;
+/* ═══════════════════ Bar mode (mini popup) ═══════════════════ */
+body.bar-mode {
+  background: #1a1a26; overflow: hidden;
   user-select: none; -webkit-user-select: none;
 }
-body.vinyl-mode .wallpaper,
-body.vinyl-mode .hero,
-body.vinyl-mode .content,
-body.vinyl-mode .footer,
-body.vinyl-mode .bottom-bar,
-body.vinyl-mode::before { display: none !important; }
+body.bar-mode .wallpaper,
+body.bar-mode .hero,
+body.bar-mode .content,
+body.bar-mode .footer,
+body.bar-mode .bottom-bar,
+body.bar-mode::before { display: none !important; }
 
-.vinyl-standalone { display: none; position: relative; }
-body.vinyl-mode .vinyl-standalone {
-  display: flex; flex-direction: column; align-items: center;
+.mini-bar { display: none; }
+body.bar-mode .mini-bar {
+  display: flex; align-items: center; gap: 10px;
+  height: 100vh; padding: 0 12px;
 }
-
-.vinyl-disc-large {
-  width: 220px; height: 220px; border-radius: 50%;
-  background: conic-gradient(from 0deg, #1a1a1a 0%, #2d2d2d 7%, #1a1a1a 14%, #333 21%, #1a1a1a 28%, #2d2d2d 35%, #1a1a1a 42%, #333 49%, #1a1a1a 56%, #2d2d2d 63%, #1a1a1a 70%, #333 77%, #1a1a1a 84%, #3a3a3a 91%, #1a1a1a 100%);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 80px rgba(0,0,0,0.5), 0 0 140px rgba(74,122,154,0.12);
-  cursor: pointer; -webkit-app-region: no-drag;
-  transition: transform 0.15s;
+.mini-bar-cover {
+  width: 42px; height: 42px; border-radius: 6px; object-fit: cover;
+  flex-shrink: 0; background: rgba(255,255,255,0.05);
 }
-.vinyl-disc-large:hover { transform: scale(1.04); }
-.vinyl-disc-large.playing { animation: vinylSpin 4s linear infinite; }
-.vinyl-disc-large.playing:hover { animation: vinylSpin 4s linear infinite; }
-
-.vinyl-cover-large {
-  width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
-  border: 2px solid rgba(255,255,255,0.08);
-  background: #1a1a2e;
+.mini-bar-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mini-bar-title {
+  font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.9);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
-@keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.vinyl-controls {
-  margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  opacity: 0; transition: opacity 0.35s;
-  -webkit-app-region: no-drag;
+.mini-bar-artist { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+.mini-bar-progress {
+  width: 100%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px;
+  margin-top: 1px;
 }
-.vinyl-controls.show { opacity: 1; }
-.vinyl-song-title { font-size: 0.92rem; font-weight: 600; color: rgba(255,255,255,0.88); letter-spacing: 0.03em; }
-.vinyl-song-artist { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
-.vinyl-ctrl-row { display: flex; gap: 14px; align-items: center; }
-.vinyl-ctrl-row button {
-  width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); font-size: 15px;
-  cursor: pointer; transition: all 0.2s;
+.mini-bar-progress-fill {
+  height: 100%; background: var(--c-blue-lt); border-radius: 1px;
+  transition: width 0.3s linear;
 }
-.vinyl-ctrl-row button:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.25); }
-.vinyl-ctrl-row .vinyl-play-btn { width: 48px; height: 48px; font-size: 20px; background: rgba(255,255,255,0.12); }
-.vinyl-ctrl-row .vinyl-play-btn:hover { background: rgba(255,255,255,0.22); }
-.vinyl-hint { font-size: 0.66rem; color: rgba(255,255,255,0.25); margin-top: 14px; letter-spacing: 0.05em; }
+.mini-bar-ctrl { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+.mini-bar-ctrl button {
+  width: 28px; height: 28px; border: none; border-radius: 6px;
+  background: transparent; color: rgba(255,255,255,0.6); font-size: 13px;
+  cursor: pointer; transition: all 0.15s;
+}
+.mini-bar-ctrl button:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
+.mini-bar-ctrl .mini-play { font-size: 15px; }
+.mini-bar-expand {
+  font-size: 0.65rem; color: rgba(255,255,255,0.3); cursor: pointer;
+  padding: 2px 8px; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
+  background: transparent; transition: all 0.15s;
+}
+.mini-bar-expand:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
 
 
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
@@ -1291,7 +1282,7 @@ if (!window.opener) {
   var popupBtn = document.getElementById('popupBtn');
   popupBtn.style.display = 'inline-block';
   popupBtn.addEventListener('click', function(){
-    window.open(location.origin+'/?vinyl=1', 'yuki_player', 'width=380,height=500');
+    window.open(location.origin+'/?bar=1', 'yuki_player', 'width=440,height=72');
     document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--c-blue);color:#fff;padding:10px 20px;border-radius:20px;z-index:9999;font-size:14px;animation:fadeIn 0.3s">✅ 已弹出独立播放器，可关闭此标签页</div>');
   });
 }
@@ -1309,79 +1300,64 @@ async function init() {
 init();
 </script>
 
-<!-- ═══════════════════ Vinyl standalone ═══════════════════ -->
-<div class="vinyl-standalone" id="vinylStandalone">
-  <div class="vinyl-disc-large" id="vinylDiscLarge">
-    <img class="vinyl-cover-large" id="vinylCoverLarge" src="/default-vinyl.svg" alt="">
+<!-- ═══════════════════ Mini bar popup ═══════════════════ -->
+<div class="mini-bar" id="miniBar">
+  <img class="mini-bar-cover" id="miniCover" src="/default-vinyl.svg" alt="">
+  <div class="mini-bar-info">
+    <div class="mini-bar-title" id="miniTitle">选一首歌开始播放</div>
+    <div class="mini-bar-artist" id="miniArtist"></div>
+    <div class="mini-bar-progress"><div class="mini-bar-progress-fill" id="miniProgress" style="width:0%"></div></div>
   </div>
-  <div class="vinyl-controls" id="vinylControls">
-    <div class="vinyl-song-title" id="vinylSongTitle">选一首歌开始播放</div>
-    <div class="vinyl-song-artist" id="vinylSongArtist"></div>
-    <div class="vinyl-ctrl-row">
-      <button id="vinylPrev" title="上一首">⏮</button>
-      <button class="vinyl-play-btn" id="vinylPlayBtn" title="播放/暂停">▶</button>
-      <button id="vinylNext" title="下一首">⏭</button>
-    </div>
+  <div class="mini-bar-ctrl">
+    <button id="miniPrev" title="上一首">⏮</button>
+    <button class="mini-play" id="miniPlay" title="播放/暂停">▶</button>
+    <button id="miniNext" title="下一首">⏭</button>
   </div>
-  <div class="vinyl-hint" id="vinylHint">双击展开完整音乐站</div>
+  <button class="mini-bar-expand" id="miniExpand" title="展开完整音乐站">⛶</button>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════
-//  Vinyl standalone mode
+//  Mini bar mode
 // ═══════════════════════════════════════════════
 (function(){
-if (!location.search.includes('vinyl=1')) return;
-document.body.classList.add('vinyl-mode');
+if (!location.search.includes('bar=1')) return;
+document.body.classList.add('bar-mode');
 
-var vsDisc = document.getElementById('vinylDiscLarge');
-var vsCover = document.getElementById('vinylCoverLarge');
-var vsControls = document.getElementById('vinylControls');
-var vsTitle = document.getElementById('vinylSongTitle');
-var vsArtist = document.getElementById('vinylSongArtist');
-var vsPlayBtn = document.getElementById('vinylPlayBtn');
-var vsHint = document.getElementById('vinylHint');
-var controlsTimer = null;
+var mTitle = document.getElementById('miniTitle');
+var mArtist = document.getElementById('miniArtist');
+var mCover = document.getElementById('miniCover');
+var mProgress = document.getElementById('miniProgress');
+var mPlay = document.getElementById('miniPlay');
 
-function showControls(){
-  vsControls.classList.add('show'); vsHint.style.opacity='0';
-  clearTimeout(controlsTimer);
-  controlsTimer = setTimeout(function(){ vsControls.classList.remove('show'); vsHint.style.opacity='1'; }, 4000);
-}
-
-// Click disc → toggle controls
-vsDisc.addEventListener('click', function(){
-  if (vsControls.classList.contains('show')) { vsControls.classList.remove('show'); vsHint.style.opacity='1'; }
-  else showControls();
-});
-
-// Double-click → close popup, open full music station
-vsDisc.addEventListener('dblclick', function(){
-  window.open('https://music.fake-star.xyz', '_blank');
+// Expand → close popup, open full music station
+document.getElementById('miniExpand').addEventListener('click', function(){
+  window.open(location.origin, '_blank');
   window.close();
 });
 
-// Poll now-playing from own backend
+// Poll own player state
+setInterval(function(){
+  if (!player.src) return;
+  mTitle.textContent = document.querySelector('.player-info .title')?.textContent || '';
+  mArtist.textContent = document.querySelector('.player-info .artist')?.textContent || '';
+  var pct = player.duration ? (player.currentTime/player.duration*100) : 0;
+  mProgress.style.width = pct + '%';
+}, 500);
+
+player.addEventListener('play', function(){ mPlay.textContent = '⏸'; });
+player.addEventListener('pause', function(){ mPlay.textContent = '▶'; });
+
+// Sync cover from now-playing
 setInterval(function(){
   fetch('/api/now-playing').then(function(r){return r.json()}).then(function(info){
-    if (!info.title) { vsDisc.classList.remove('playing'); vsPlayBtn.textContent='▶'; return; }
-    vsTitle.textContent = info.title;
-    vsArtist.textContent = info.artist || '';
-    vsCover.src = info.cover || '/default-vinyl.svg';
-    if (!player.src || player.paused) {
-      vsDisc.classList.remove('playing'); vsPlayBtn.textContent='▶';
-    }
+    if (info.cover) mCover.src = info.cover;
   }).catch(function(){});
-}, 2000);
+}, 3000);
 
-// Sync with audio player state
-player.addEventListener('play', function(){ vsDisc.classList.add('playing'); vsPlayBtn.textContent='⏸'; showControls(); });
-player.addEventListener('pause', function(){ vsDisc.classList.remove('playing'); vsPlayBtn.textContent='▶'; showControls(); });
-
-// Controls
-document.getElementById('vinylPrev').addEventListener('click', function(e){ e.stopPropagation(); prev(); });
-document.getElementById('vinylNext').addEventListener('click', function(e){ e.stopPropagation(); next(); });
-vsPlayBtn.addEventListener('click', function(e){ e.stopPropagation(); togglePlay(); });
+document.getElementById('miniPrev').addEventListener('click', function(){ prev(); });
+document.getElementById('miniNext').addEventListener('click', function(){ next(); });
+mPlay.addEventListener('click', function(){ togglePlay(); });
 })();
 </script>
 </body>
