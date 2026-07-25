@@ -125,6 +125,66 @@ body.mini .sidebar { width: 100%; }
 body.mini .main-area { width: 100%; }
 body.mini .glass-card { padding: var(--sp2); margin-bottom: 0; border-radius: 0; }
 
+/* ═══════════════════ Vinyl standalone mode ═══════════════════ */
+body.vinyl-mode {
+  background: radial-gradient(ellipse at center, #1e1e30 0%, #0a0a16 100%);
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh; overflow: hidden;
+  -webkit-app-region: drag;
+  user-select: none; -webkit-user-select: none;
+}
+body.vinyl-mode .wallpaper,
+body.vinyl-mode .hero,
+body.vinyl-mode .content,
+body.vinyl-mode .footer,
+body.vinyl-mode .bottom-bar,
+body.vinyl-mode::before { display: none !important; }
+
+.vinyl-standalone { display: none; position: relative; }
+body.vinyl-mode .vinyl-standalone {
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.vinyl-disc-large {
+  width: 220px; height: 220px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #1a1a1a 0%, #2d2d2d 7%, #1a1a1a 14%, #333 21%, #1a1a1a 28%, #2d2d2d 35%, #1a1a1a 42%, #333 49%, #1a1a1a 56%, #2d2d2d 63%, #1a1a1a 70%, #333 77%, #1a1a1a 84%, #3a3a3a 91%, #1a1a1a 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 80px rgba(0,0,0,0.5), 0 0 140px rgba(74,122,154,0.12);
+  cursor: pointer; -webkit-app-region: no-drag;
+  transition: transform 0.15s;
+}
+.vinyl-disc-large:hover { transform: scale(1.04); }
+.vinyl-disc-large.playing { animation: vinylSpin 4s linear infinite; }
+.vinyl-disc-large.playing:hover { animation: vinylSpin 4s linear infinite; }
+
+.vinyl-cover-large {
+  width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.08);
+  background: #1a1a2e;
+}
+
+@keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.vinyl-controls {
+  margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  opacity: 0; transition: opacity 0.35s;
+  -webkit-app-region: no-drag;
+}
+.vinyl-controls.show { opacity: 1; }
+.vinyl-song-title { font-size: 0.92rem; font-weight: 600; color: rgba(255,255,255,0.88); letter-spacing: 0.03em; }
+.vinyl-song-artist { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+.vinyl-ctrl-row { display: flex; gap: 14px; align-items: center; }
+.vinyl-ctrl-row button {
+  width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); font-size: 15px;
+  cursor: pointer; transition: all 0.2s;
+}
+.vinyl-ctrl-row button:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.25); }
+.vinyl-ctrl-row .vinyl-play-btn { width: 48px; height: 48px; font-size: 20px; background: rgba(255,255,255,0.12); }
+.vinyl-ctrl-row .vinyl-play-btn:hover { background: rgba(255,255,255,0.22); }
+.vinyl-hint { font-size: 0.66rem; color: rgba(255,255,255,0.25); margin-top: 14px; letter-spacing: 0.05em; }
+
+
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
 .player-info { flex: 1; min-width: 0; }
 .player-info .title { font-size: 1rem; font-weight: 600; color: var(--c-blue-dk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1231,7 +1291,7 @@ if (!window.opener) {
   var popupBtn = document.getElementById('popupBtn');
   popupBtn.style.display = 'inline-block';
   popupBtn.addEventListener('click', function(){
-    window.open(location.href, 'yuki_player', 'width=400,height=700');
+    window.open(location.origin+'/?vinyl=1', 'yuki_player', 'width=380,height=500');
     document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--c-blue);color:#fff;padding:10px 20px;border-radius:20px;z-index:9999;font-size:14px;animation:fadeIn 0.3s">✅ 已弹出独立播放器，可关闭此标签页</div>');
   });
 }
@@ -1247,6 +1307,82 @@ async function init() {
 }
 
 init();
+</script>
+
+<!-- ═══════════════════ Vinyl standalone ═══════════════════ -->
+<div class="vinyl-standalone" id="vinylStandalone">
+  <div class="vinyl-disc-large" id="vinylDiscLarge">
+    <img class="vinyl-cover-large" id="vinylCoverLarge" src="/default-vinyl.svg" alt="">
+  </div>
+  <div class="vinyl-controls" id="vinylControls">
+    <div class="vinyl-song-title" id="vinylSongTitle">选一首歌开始播放</div>
+    <div class="vinyl-song-artist" id="vinylSongArtist"></div>
+    <div class="vinyl-ctrl-row">
+      <button id="vinylPrev" title="上一首">⏮</button>
+      <button class="vinyl-play-btn" id="vinylPlayBtn" title="播放/暂停">▶</button>
+      <button id="vinylNext" title="下一首">⏭</button>
+    </div>
+  </div>
+  <div class="vinyl-hint" id="vinylHint">双击展开完整音乐站</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  Vinyl standalone mode
+// ═══════════════════════════════════════════════
+(function(){
+if (!location.search.includes('vinyl=1')) return;
+document.body.classList.add('vinyl-mode');
+
+var vsDisc = document.getElementById('vinylDiscLarge');
+var vsCover = document.getElementById('vinylCoverLarge');
+var vsControls = document.getElementById('vinylControls');
+var vsTitle = document.getElementById('vinylSongTitle');
+var vsArtist = document.getElementById('vinylSongArtist');
+var vsPlayBtn = document.getElementById('vinylPlayBtn');
+var vsHint = document.getElementById('vinylHint');
+var controlsTimer = null;
+
+function showControls(){
+  vsControls.classList.add('show'); vsHint.style.opacity='0';
+  clearTimeout(controlsTimer);
+  controlsTimer = setTimeout(function(){ vsControls.classList.remove('show'); vsHint.style.opacity='1'; }, 4000);
+}
+
+// Click disc → toggle controls
+vsDisc.addEventListener('click', function(){
+  if (vsControls.classList.contains('show')) { vsControls.classList.remove('show'); vsHint.style.opacity='1'; }
+  else showControls();
+});
+
+// Double-click → close popup, open full music station
+vsDisc.addEventListener('dblclick', function(){
+  window.open('https://music.fake-star.xyz', '_blank');
+  window.close();
+});
+
+// Poll now-playing from own backend
+setInterval(function(){
+  fetch('/api/now-playing').then(function(r){return r.json()}).then(function(info){
+    if (!info.title) { vsDisc.classList.remove('playing'); vsPlayBtn.textContent='▶'; return; }
+    vsTitle.textContent = info.title;
+    vsArtist.textContent = info.artist || '';
+    vsCover.src = info.cover || '/default-vinyl.svg';
+    if (!player.src || player.paused) {
+      vsDisc.classList.remove('playing'); vsPlayBtn.textContent='▶';
+    }
+  }).catch(function(){});
+}, 2000);
+
+// Sync with audio player state
+player.addEventListener('play', function(){ vsDisc.classList.add('playing'); vsPlayBtn.textContent='⏸'; showControls(); });
+player.addEventListener('pause', function(){ vsDisc.classList.remove('playing'); vsPlayBtn.textContent='▶'; showControls(); });
+
+// Controls
+document.getElementById('vinylPrev').addEventListener('click', function(e){ e.stopPropagation(); prev(); });
+document.getElementById('vinylNext').addEventListener('click', function(e){ e.stopPropagation(); next(); });
+vsPlayBtn.addEventListener('click', function(e){ e.stopPropagation(); togglePlay(); });
+})();
 </script>
 </body>
 </html>
