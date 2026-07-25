@@ -125,47 +125,6 @@ body.mini .sidebar { width: 100%; }
 body.mini .main-area { width: 100%; }
 body.mini .glass-card { padding: var(--sp2); margin-bottom: 0; border-radius: 0; }
 
-/* ═══════════════════ Bar mode (mini popup) ═══════════════════ */
-body.bar-mode {
-  background: #1a1a26; overflow: hidden; margin: 0; padding: 0;
-  height: 100vh; user-select: none; -webkit-user-select: none;
-}
-body.bar-mode > * { display: none !important; }
-body.bar-mode > .mini-bar { display: flex !important; align-items: center; gap: 10px; height: 100%; padding: 0 10px; }
-.mini-bar-cover {
-  width: 42px; height: 42px; border-radius: 6px; object-fit: cover;
-  flex-shrink: 0; background: rgba(255,255,255,0.05);
-}
-.mini-bar-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.mini-bar-title {
-  font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.9);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.mini-bar-artist { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
-.mini-bar-progress {
-  width: 100%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px;
-  margin-top: 1px;
-}
-.mini-bar-progress-fill {
-  height: 100%; background: var(--c-blue-lt); border-radius: 1px;
-  transition: width 0.3s linear;
-}
-.mini-bar-ctrl { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-.mini-bar-ctrl button {
-  width: 28px; height: 28px; border: none; border-radius: 6px;
-  background: transparent; color: rgba(255,255,255,0.6); font-size: 13px;
-  cursor: pointer; transition: all 0.15s;
-}
-.mini-bar-ctrl button:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
-.mini-bar-ctrl .mini-play { font-size: 15px; }
-.mini-bar-expand {
-  font-size: 0.65rem; color: rgba(255,255,255,0.3); cursor: pointer;
-  padding: 2px 8px; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
-  background: transparent; transition: all 0.15s;
-}
-.mini-bar-expand:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
-
-
 .player-bar { display: flex; align-items: center; gap: var(--sp3); padding-bottom: var(--sp3); border-bottom: 1px solid rgba(74,122,154,0.08); margin-bottom: var(--sp3); }
 .player-info { flex: 1; min-width: 0; }
 .player-info .title { font-size: 1rem; font-weight: 600; color: var(--c-blue-dk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -344,7 +303,7 @@ audio { display: none; }
 <!-- ═══════════════════ Hero ═══════════════════ -->
 <section class="hero">
   <div class="hero-inner">
-    <h1>Yuki 的小曲 <button id="popupBtn" title="弹出独立播放器" style="display:none;font-size:1.2rem;background:none;border:1px solid var(--c-blue);color:var(--c-blue);border-radius:8px;padding:2px 10px;cursor:pointer;margin-left:8px;vertical-align:middle">🔔 弹出</button></h1>
+    <h1>Yuki 的小曲</h1>
     <p class="tagline">サカナクション · 花譜 · あいみょん</p>
   </div>
 </section>
@@ -1013,7 +972,8 @@ async function loadNcmTracks(plId) {
         artist: (s.ar||[]).map(a => a.name).join(' / '),
         album: s.al?.name,
         duration: (s.dt||0) / 1000,
-        source: 'netease'
+        source: 'netease',
+        picUrl: (s.al||{}).picUrl || s.picUrl || ''
       }));
       renderNcmTracks();
     }
@@ -1138,7 +1098,7 @@ async function doNcmSearch() {
     var r = await fetch('/api/ncm/search?keywords=' + encodeURIComponent(q));
     var d = await r.json();
     ncmResults = (d.result?.songs || []).map(function(s){
-      return {id:s.id,title:s.name,artist:(s.ar||[]).map(function(a){return a.name;}).join(' / '),album:(s.al||{}).name||'',duration:(s.dt||0)/1000,source:'netease'};
+      return {id:s.id,title:s.name,artist:(s.ar||[]).map(function(a){return a.name;}).join(' / '),album:(s.al||{}).name||'',duration:(s.dt||0)/1000,source:'netease',picUrl:(s.al||{}).picUrl||s.picUrl||''};
     });
   } catch(e) {}
   // Also include matching local songs at top
@@ -1289,16 +1249,6 @@ if (location.search.includes('mini=1')) { document.body.classList.add('mini'); }
 
 // Popup button: show if not already in a popup, opens a dedicated player window
 if (!window.opener) {
-  var popupBtn = document.getElementById('popupBtn');
-  popupBtn.style.display = 'inline-block';
-  popupBtn.addEventListener('click', function(){
-    window.open(location.origin+'/?bar=1', 'yuki_player', 'popup,width=440,height=86');
-    document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--c-blue);color:#fff;padding:10px 20px;border-radius:20px;z-index:9999;font-size:14px;animation:fadeIn 0.3s">✅ 已弹出独立播放器，可关闭此标签页</div>');
-  });
-}
-
-// ═══════════════════════════════════════════════
-//  Init
 // ═══════════════════════════════════════════════
 async function init() {
   await loadSongs();
@@ -1310,66 +1260,5 @@ async function init() {
 init();
 </script>
 
-<!-- ═══════════════════ Mini bar popup ═══════════════════ -->
-<div class="mini-bar" id="miniBar">
-  <img class="mini-bar-cover" id="miniCover" src="/default-vinyl.svg" alt="">
-  <div class="mini-bar-info">
-    <div class="mini-bar-title" id="miniTitle">选一首歌开始播放</div>
-    <div class="mini-bar-artist" id="miniArtist"></div>
-    <div class="mini-bar-progress"><div class="mini-bar-progress-fill" id="miniProgress" style="width:0%"></div></div>
-  </div>
-  <div class="mini-bar-ctrl">
-    <button id="miniPrev" title="上一首">⏮</button>
-    <button class="mini-play" id="miniPlay" title="播放/暂停">▶</button>
-    <button id="miniNext" title="下一首">⏭</button>
-  </div>
-  <button class="mini-bar-expand" id="miniExpand" title="展开完整音乐站">⛶</button>
-</div>
-
-<script>
-// ═══════════════════════════════════════════════
-//  Mini bar mode
-// ═══════════════════════════════════════════════
-(function(){
-if (!location.search.includes('bar=1')) return;
-document.documentElement.style.overflow = 'hidden';
-document.body.classList.add('bar-mode');
-
-var mTitle = document.getElementById('miniTitle');
-var mArtist = document.getElementById('miniArtist');
-var mCover = document.getElementById('miniCover');
-var mProgress = document.getElementById('miniProgress');
-var mPlay = document.getElementById('miniPlay');
-
-// Expand → close popup, open full music station
-document.getElementById('miniExpand').addEventListener('click', function(){
-  window.open(location.origin, '_blank');
-  window.close();
-});
-
-// Poll own player state
-setInterval(function(){
-  if (!player.src) return;
-  mTitle.textContent = document.querySelector('.player-info .title')?.textContent || '';
-  mArtist.textContent = document.querySelector('.player-info .artist')?.textContent || '';
-  var pct = player.duration ? (player.currentTime/player.duration*100) : 0;
-  mProgress.style.width = pct + '%';
-}, 500);
-
-player.addEventListener('play', function(){ mPlay.textContent = '⏸'; });
-player.addEventListener('pause', function(){ mPlay.textContent = '▶'; });
-
-// Sync cover from now-playing
-setInterval(function(){
-  fetch('/api/now-playing').then(function(r){return r.json()}).then(function(info){
-    if (info.cover) mCover.src = info.cover;
-  }).catch(function(){});
-}, 3000);
-
-document.getElementById('miniPrev').addEventListener('click', function(){ prev(); });
-document.getElementById('miniNext').addEventListener('click', function(){ next(); });
-mPlay.addEventListener('click', function(){ togglePlay(); });
-})();
-</script>
 </body>
 </html>
