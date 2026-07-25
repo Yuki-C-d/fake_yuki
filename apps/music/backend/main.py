@@ -99,6 +99,11 @@ def pwa_icon(name: str):
     return _serve_static(f"icons/{name}", "image/png")
 
 
+@app.get("/default-vinyl.svg")
+def vinyl_default():
+    return _serve_static("default-vinyl.svg", "image/svg+xml")
+
+
 @app.get("/test")
 def test_page():
     with open("apps/music/frontend/test.html", encoding="utf-8") as f:
