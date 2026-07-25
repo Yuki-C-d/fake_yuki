@@ -10,7 +10,8 @@
 | 模块 | 路径 | 状态 | 说明 |
 |------|------|------|------|
 | 🏠 **个人主站** | `apps/home/` | ✅ 运行中 | 站点入口，Hero + 功能卡片 + 随手记 |
-| 🎵 音乐播放器 | `apps/music/` | ✅ 运行中 | 自建音乐云，浏览器听歌 |
+| 🎵 音乐播放器 | `apps/music/` | ✅ 运行中 | 自建音乐云 + Chrome 扩展迷你面板 |
+| 🔌 音乐扩展 | `apps/music/extension/` | ✅ 运行中 | Chrome MV3，工具栏弹出控制面板 |
 | 🔗 书签站 | `apps/bookmarks/` | ✅ 运行中 | ECS :8081 + SQLite，标签分类+增删改 |
 | 🎨 **设计系统** | `yuki_风格/` | ✅ **定稿** | **全站视觉规范，所有功能站风格统一依据** |
 | ☁️ 服务器 | `server/` | ✅ 运行中 | 阿里云 ECS + Caddy 反代 + HTTPS |
@@ -328,6 +329,7 @@ npm config set registry https://registry.npmmirror.com
 | **2026-07-22** | 书签站重构：FastAPI+SQLite 后端，标签页切换+动画，增删改书签，ECS :8081 部署；apps/nav→apps/bookmarks 重命名 |
 | **2026-07-23** | 书签站新分类修复；音乐站队列逻辑修复（手动播放锁定，auto-advance 跟随）；STYLE_GUIDE 组件规范完善；跨站播放方案讨论（备案后统一架构） |
 | **2026-07-24** | 🎉 域名备案通过，DNS 切至 ECS；三站统一部署（Caddy 反代 + Let's Encrypt HTTPS）；主站上线 https://fake-star.xyz；端口收敛（8080/8081 仅本地监听）；书签站 nav→bookmarks 路径修正 |
+| **2026-07-25** | 🔌 Chrome 扩展迷你播放器（MV3，popup+content+background）；NCM 封面 picUrl 修复；跨站弹窗简化（主站恢复普通链接）；清理旧迷你弹窗代码；OpenClaw 卸载+frp 隧道清空；全部文档+记忆文件同步 |
 
 ### 下一步
 

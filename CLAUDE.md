@@ -6,7 +6,7 @@
 
 ```
 apps/home/      - 🏠 个人主站（Hero + 功能卡片 + 随手记）
-apps/music/     - 🎵 音乐播放器（本地+网易云双源，yuki_风格）
+apps/music/     - 🎵 音乐播放器（本地+网易云双源，yuki_风格，含 Chrome 扩展）
 apps/bookmarks/ - 🔗 书签站 (ECS :8081)
 yuki_风格/      - 🎨 全站视觉设计规范（利兹与青鸟 × 玻璃童话）
 server/         - ☁️ ECS + frp 服务器配置
