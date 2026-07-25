@@ -745,6 +745,26 @@ window.addEventListener('storage', function(e){
   }
 });
 
+// Listen for extension commands via postMessage
+window.addEventListener('message', function(e){
+  if (e.data?.type !== 'YUKI_COMMAND') return;
+  var a = e.data.action;
+  if (a === 'next') next();
+  else if (a === 'prev') prev();
+  else if (a === 'play') { if(player.src && player.paused) player.play().catch(function(){}); else if(!player.src) { var q=getQueue(); if(q.length) playTrack(q[0],currentTrackSource); } }
+  else if (a === 'pause') player.pause();
+  else if (a === 'toggle') togglePlay();
+  else if (a === 'seek' && e.data.data?.percent != null) {
+    if (player.duration) player.currentTime = player.duration * e.data.data.percent;
+  }
+  else if (a === 'getState') {
+    var state = {playing: !player.paused, currentTime: player.currentTime, duration: player.duration || 0};
+    e.source.postMessage({type: 'YUKI_STATE', playing: state.playing, currentTime: state.currentTime, duration: state.duration}, '*');
+    // Also update now-playing time
+    try { fetch('/api/now-playing', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:document.querySelector('.player-info .title')?.textContent||'',artist:document.querySelector('.player-info .artist')?.textContent||'',time:Date.now(),playing:state.playing})}); } catch(ex){}
+  }
+});
+
 // URL expiry check
 setInterval(() => {
   if (ncmUrlExpires && Date.now() > ncmUrlExpires - 2*60000 && currentTrackSource === SOURCE.NETEASE) {

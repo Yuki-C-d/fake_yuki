@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap');
+
+:root {
+  --c-blue: #4A7A9A; --c-blue-lt: #7DAEC8; --c-blue-dk: #2E5F78;
+  --c-warm: #E8683A; --c-text: #e0e0e0; --c-text-lt: #888;
+  --f-serif: 'Noto Serif SC', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow: hidden; }
+body {
+  width: 320px; min-height: 340px;
+  background: #16161f; color: var(--c-text);
+  font-family: var(--f-serif); font-weight: 500;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 28px 24px 18px;
+  user-select: none; -webkit-user-select: none;
+}
+
+/* Cover */
+.cover-wrap {
+  width: 130px; height: 130px; border-radius: 14px; overflow: hidden;
+  margin-bottom: 18px; flex-shrink: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  background: rgba(255,255,255,0.04);
+}
+.cover-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Info */
+.info { width: 100%; text-align: center; margin-bottom: 10px; }
+.title {
+  font-size: 0.92rem; font-weight: 600; color: #eee;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.artist { font-size: 0.72rem; color: var(--c-text-lt); margin-top: 2px; line-height: 1.3; }
+
+/* Progress */
+.progress-wrap { width: 100%; margin-bottom: 6px; }
+.progress-rail {
+  width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;
+  cursor: pointer; position: relative;
+}
+.progress-fill {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: linear-gradient(90deg, var(--c-blue-lt), var(--c-blue));
+  border-radius: 2px; transition: width 0.3s linear;
+}
+.time-row {
+  display: flex; justify-content: space-between; margin-top: 3px;
+  font-size: 0.62rem; color: var(--c-text-lt);
+}
+
+/* Controls */
+.ctrls {
+  display: flex; align-items: center; gap: 18px; margin: 12px 0 16px;
+}
+.ctrl-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+  color: #ccc; font-size: 16px; cursor: pointer;
+  transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+}
+.ctrl-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: #fff; }
+.ctrl-btn.play-btn {
+  width: 52px; height: 52px; font-size: 22px;
+  background: var(--c-warm); border-color: var(--c-warm); color: #fff;
+}
+.ctrl-btn.play-btn:hover { filter: brightness(1.1); }
+.ctrl-btn:active { transform: scale(0.93); }
+
+/* Link */
+.bottom-link {
+  font-size: 0.68rem; color: var(--c-text-lt); text-decoration: none;
+  padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.06); width: 100%;
+  text-align: center; transition: color 0.15s; cursor: pointer;
+}
+.bottom-link:hover { color: #fff; }
+
+/* Idle state */
+.idle-msg { display: none; text-align: center; padding: 40px 0; color: var(--c-text-lt); }
+.idle-msg .emoji { font-size: 2.4rem; margin-bottom: 12px; }
+.idle-msg .msg { font-size: 0.82rem; margin-bottom: 8px; }
+.idle-msg .open-btn {
+  display: inline-block; padding: 6px 18px; border-radius: 20px;
+  border: 1px solid var(--c-blue-lt); color: var(--c-blue-lt);
+  font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+}
+.idle-msg .open-btn:hover { background: rgba(74,122,154,0.15); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- Playing state -->
+<div id="playingView" style="display:none">
+  <div class="cover-wrap"><img id="cover" src="" alt=""></div>
+  <div class="info">
+    <div class="title" id="title">-</div>
+    <div class="artist" id="artist">-</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-rail" id="progressRail">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="time-row">
+      <span id="timeCur">0:00</span>
+      <span id="timeDur">0:00</span>
+    </div>
+  </div>
+  <div class="ctrls">
+    <button class="ctrl-btn" id="btnPrev" title="上一首">⏮</button>
+    <button class="ctrl-btn play-btn" id="btnPlay" title="播放/暂停">▶</button>
+    <button class="ctrl-btn" id="btnNext" title="下一首">⏭</button>
+  </div>
+</div>
+
+<!-- Idle state -->
+<div class="idle-msg" id="idleView">
+  <div class="emoji">🎵</div>
+  <div class="msg">未检测到播放器</div>
+  <div class="open-btn" id="openMusic">打开 Yuki 的小曲</div>
+</div>
+
+<div class="bottom-link" id="openFull">打开完整音乐站 →</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
