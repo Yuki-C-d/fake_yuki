@@ -127,21 +127,11 @@ body.mini .glass-card { padding: var(--sp2); margin-bottom: 0; border-radius: 0;
 
 /* ═══════════════════ Bar mode (mini popup) ═══════════════════ */
 body.bar-mode {
-  background: #1a1a26; overflow: hidden;
-  user-select: none; -webkit-user-select: none;
+  background: #1a1a26; overflow: hidden; margin: 0; padding: 0;
+  height: 100vh; user-select: none; -webkit-user-select: none;
 }
-body.bar-mode .wallpaper,
-body.bar-mode .hero,
-body.bar-mode .content,
-body.bar-mode .footer,
-body.bar-mode .bottom-bar,
-body.bar-mode::before { display: none !important; }
-
-.mini-bar { display: none; }
-body.bar-mode .mini-bar {
-  display: flex; align-items: center; gap: 10px;
-  height: 100vh; padding: 0 12px;
-}
+body.bar-mode > * { display: none !important; }
+body.bar-mode > .mini-bar { display: flex !important; align-items: center; gap: 10px; height: 100%; padding: 0 10px; }
 .mini-bar-cover {
   width: 42px; height: 42px; border-radius: 6px; object-fit: cover;
   flex-shrink: 0; background: rgba(255,255,255,0.05);
@@ -1282,7 +1272,7 @@ if (!window.opener) {
   var popupBtn = document.getElementById('popupBtn');
   popupBtn.style.display = 'inline-block';
   popupBtn.addEventListener('click', function(){
-    window.open(location.origin+'/?bar=1', 'yuki_player', 'width=440,height=72');
+    window.open(location.origin+'/?bar=1', 'yuki_player', 'popup,width=440,height=86');
     document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--c-blue);color:#fff;padding:10px 20px;border-radius:20px;z-index:9999;font-size:14px;animation:fadeIn 0.3s">✅ 已弹出独立播放器，可关闭此标签页</div>');
   });
 }
@@ -1322,6 +1312,7 @@ init();
 // ═══════════════════════════════════════════════
 (function(){
 if (!location.search.includes('bar=1')) return;
+document.documentElement.style.overflow = 'hidden';
 document.body.classList.add('bar-mode');
 
 var mTitle = document.getElementById('miniTitle');

@@ -149,7 +149,7 @@ setInterval(function(){
 // Click vinyl disc → open/focus music popup
 vpd.addEventListener('click',function(e){
   if(e.target.closest('.vinyl-btn'))return;
-  window.open(VP_API+'?bar=1','yuki_player','width=440,height=72');
+  window.open(VP_API+'?bar=1','yuki_player','popup,width=440,height=86');
 });
 // Play/pause button → send toggle command via localStorage
 vpb.addEventListener('click',function(){
