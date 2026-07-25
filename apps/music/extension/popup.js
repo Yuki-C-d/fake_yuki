@@ -75,7 +75,7 @@ async function refreshUI() {
   playingView.style.display = ''; idleView.style.display = 'none';
   elTitle.textContent = np.title;
   elArtist.textContent = np.artist || '';
-  if (np.cover) elCover.src = np.cover;
+  elCover.src = np.cover || API + '/default-vinyl.svg';
   if (np.duration) {
     var pct = np.duration > 0 ? (np.currentTime/np.duration*100) : 0;
     setProgress(pct, np.currentTime||0, np.duration);
