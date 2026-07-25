@@ -303,7 +303,7 @@ audio { display: none; }
 <!-- ═══════════════════ Hero ═══════════════════ -->
 <section class="hero">
   <div class="hero-inner">
-    <h1>Yuki 的小曲</h1>
+    <h1>Yuki 的小曲 <button id="popupBtn" title="弹出独立播放器" style="display:none;font-size:1.2rem;background:none;border:1px solid var(--c-blue);color:var(--c-blue);border-radius:8px;padding:2px 10px;cursor:pointer;margin-left:8px;vertical-align:middle">🔔 弹出</button></h1>
     <p class="tagline">サカナクション · 花譜 · あいみょん</p>
   </div>
 </section>
@@ -700,6 +700,7 @@ window.addEventListener('storage', function(e){
   if (e.key === 'yuki_action') {
     if (e.newValue === 'next') next();
     else if (e.newValue === 'prev') prev();
+    else if (e.newValue === 'toggle') togglePlay();
   }
 });
 
@@ -1224,6 +1225,16 @@ function showAddMenu(e, songId, source) {
 
 // Mini mode: hide hero+wallpaper when ?mini=1
 if (location.search.includes('mini=1')) { document.body.classList.add('mini'); }
+
+// Popup button: show if not already in a popup, opens a dedicated player window
+if (!window.opener) {
+  var popupBtn = document.getElementById('popupBtn');
+  popupBtn.style.display = 'inline-block';
+  popupBtn.addEventListener('click', function(){
+    window.open(location.href, 'yuki_player', 'width=400,height=700');
+    document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--c-blue);color:#fff;padding:10px 20px;border-radius:20px;z-index:9999;font-size:14px;animation:fadeIn 0.3s">✅ 已弹出独立播放器，可关闭此标签页</div>');
+  });
+}
 
 // ═══════════════════════════════════════════════
 //  Init

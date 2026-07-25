@@ -132,8 +132,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 </div>
 <footer class="footer">fake-star.xyz · 2026</footer>
 <script>
-// Vinyl player
-var vpAudio=new Audio(),vpInfo=null,VP_API='https://music.fake-star.xyz';
+// Vinyl remote control — shows now-playing, click to focus music popup
+var vpInfo=null,VP_API='https://music.fake-star.xyz';
 function gid(id){return document.getElementById(id)}
 var vpe=gid('vinylPlayer'),vpd=gid('vinylDisc'),vpc=gid('vinylCover'),vpt=gid('vinylTitle'),vpa=gid('vinylArtist'),vpb=gid('vinylPlay');
 setInterval(function(){
@@ -143,13 +143,20 @@ setInterval(function(){
     vpe.style.display='';vpt.textContent=info.title;vpa.textContent=info.artist||'';
     if(vpInfo&&vpInfo.id===info.id)return;vpInfo=info;
     vpc.src=info.cover||VP_API+'/default-vinyl.svg';
-    if(!vpAudio.src){vpAudio.src=VP_API+'/api/stream/'+info.id}
     vpd.classList.add('playing');
   }).catch(function(){})
 },3000);
-vpAudio.addEventListener('play',function(){vpd.classList.add('playing');vpb.textContent='⏸'});
-vpAudio.addEventListener('pause',function(){vpd.classList.remove('playing');vpb.textContent='▶'});
-vpb.addEventListener('click',function(){vpAudio.paused?vpAudio.play():vpAudio.pause()});
+// Click vinyl disc → open/focus music popup
+vpd.addEventListener('click',function(e){
+  if(e.target.closest('.vinyl-btn'))return;
+  window.open(VP_API,'yuki_player','width=400,height=700');
+});
+// Play/pause button → send toggle command via localStorage
+vpb.addEventListener('click',function(){
+  try{localStorage.setItem('yuki_action','toggle')}catch(e){}
+  vpd.classList.contains('playing')?vpd.classList.remove('playing'):vpd.classList.add('playing');
+  vpb.textContent=vpd.classList.contains('playing')?'⏸':'▶';
+});
 var dragging=false,dx=0,dy=0;
 vpe.addEventListener('mousedown',function(e){if(e.target.closest('.vinyl-btn'))return;dragging=true;dx=e.clientX-vpe.offsetLeft;dy=e.clientY-vpe.offsetTop;e.preventDefault()});
 document.addEventListener('mousemove',function(e){if(!dragging)return;vpe.style.left=(e.clientX-dx)+'px';vpe.style.top=(e.clientY-dy)+'px';vpe.style.right='auto'});
