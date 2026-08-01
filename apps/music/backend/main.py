@@ -64,7 +64,7 @@ app.add_middleware(
 @app.get("/")
 def index():
     with open("apps/music/frontend/index.html", encoding="utf-8") as f:
-        return HTMLResponse(f.read(), headers={"Cache-Control": "no-cache"})
+        return HTMLResponse(f.read(), headers={"Cache-Control": "no-store, must-revalidate"})
 
 
 # ── PWA & 静态文件 ──
@@ -193,31 +193,26 @@ def _is_real_audio_file(filepath: str) -> bool:
         try:
             with open(filepath, "rb") as f:
                 header = f.read(12)
-            # 真 FLAC: 前4字节 "fLaC"
-            if header[:4] == b"fLaC":
-                return True
-            # MP4 容器 — 检查是否为 AV3A
-            if len(header) >= 8 and header[4:8] == b"ftyp":
-                # 进一步读取 stsd box 中的编码格式
-                try:
+                # 真 FLAC: 前4字节 "fLaC"
+                if header[:4] == b"fLaC":
+                    return True
+                # MP4 容器 — 检查是否为 AV3A
+                if len(header) >= 8 and header[4:8] == b"ftyp":
+                    # 继续读取文件体，检测 AV3A 特征
                     full = f.read(8192)
-                except Exception:
-                    full = header
-                # 查 ftyp major brand 是否为 av3a
-                if b"av3a" in full[:100].lower() or b"AV3A" in full[:100]:
+            # 查 AV3A 特征字符串
+            if b"av3a" in full[:100].lower() or b"AV3A" in full[:100]:
+                return False
+            # 查 stsd box 中的编码信息
+            stsd_idx = full.find(b"stsd")
+            if stsd_idx > 0 and len(full) > stsd_idx + 20:
+                # ftyp major brand 在文件头 8-12 字节
+                ftyp_brand = header[8:12]
+                if ftyp_brand in (b"av3a", b"AV3A", b"isom"):
+                    # av3a/isom 容器 → 极可能是 AV3A 伪装
                     return False
-                # 查 stsd box 中的编码名
-                stsd_idx = full.find(b"stsd")
-                if stsd_idx > 0 and len(full) > stsd_idx + 20:
-                    # stsd 之后 8 字节跳过 header，取 sample entry
-                    sample = full[stsd_idx+12:stsd_idx+16]
-                    # 常见 AV3A codec: 'av3a', 'AV3A', 或 sample entry 为 'mp4a' 但实际 AV3A
-                    # 如果 ftyp 不是标准 M4A，且 stsd 异常，可能是 AV3A
-                    ftyp_brand = full[8:12]
-                    if ftyp_brand in (b"av3a", b"AV3A", b"isom"):
-                        # isom 容器 + 不是 AAC → 极可能是 AV3A
-                        return False
-                return False  # 非 fLaC 的 ftyp 文件 → 不是浏览器可播格式
+            # 标准 M4A（ftyp=M4A / mp42 等）→ 真实音频
+            return True
         except Exception:
             pass
     # 未识别格式，保守起见返回 True（让 scanner 处理）
@@ -598,7 +593,7 @@ async def ncm_qr_check(body: dict):
     code = data.get("code", -1)
     result: dict = {"code": code}
     if code == 803:
-        result["nickname"] = data.get("cookie", "")
+        result["nickname"] = data.get("nickname", "")
         result["avatarUrl"] = data.get("avatarUrl", "")
     return result
 

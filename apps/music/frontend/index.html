@@ -576,6 +576,8 @@ function toast(msg) {
 // ═══════════════════════════════════════════════
 var displayedTracks = [];
 var activeQueue = [];  // locked queue for prev/next, only changes on explicit play
+var nextQueue = [];    // priority FIFO for "play next"插队
+var resumeIndex = -1;  // position in activeQueue to resume after nextQueue drains
 function getQueue() {
   if (activeQueue.length) return activeQueue;
   if (displayedTracks.length) return displayedTracks;
@@ -606,6 +608,8 @@ async function playTrack(track, source) {
   // Lock queue on manual play, keep on auto-advance
   if (!track._auto) {
     activeQueue = displayedTracks.length ? displayedTracks.slice() : [track];
+    nextQueue = [];      // reset priority queue
+    resumeIndex = -1;    // reset resume position
   }
   try { await player.play(); } catch (e) {}
   updateNowPlaying(track, source);
@@ -650,9 +654,25 @@ function prev() {
   t._auto = true; playTrack(t, trackSource(t));
 }
 function next() {
-  var q = getQueue(); if (!q.length) return;
-  var idx = q.findIndex(function(s){return s.id==currentTrackId;});
-  var t = idx < q.length-1 ? q[idx+1] : q[0];
+  var t, q = getQueue();
+  if (nextQueue.length) {
+    // Save resume position on first entry into nextQueue
+    if (resumeIndex === -1 && q.length) {
+      var idx = q.findIndex(function(s){return s.id==currentTrackId;});
+      resumeIndex = idx >= 0 ? (idx + 1) % q.length : 0;
+    }
+    t = nextQueue.shift();  // 插队优先
+  } else {
+    if (!q.length) return;
+    if (resumeIndex >= 0) {
+      // Resume original queue after nextQueue drained
+      t = q[resumeIndex];
+      resumeIndex = -1;
+    } else {
+      var idx = q.findIndex(function(s){return s.id==currentTrackId;});
+      t = idx < q.length-1 ? q[idx+1] : q[0];
+    }
+  }
   t._auto = true; playTrack(t, trackSource(t));
 }
 function togglePlay() {
@@ -1207,6 +1227,21 @@ function showAddMenu(e, songId, source) {
   hideCtxMenu();
   // Build menu directly (don't use submenu inside hidden parent)
   ctxMenu.innerHTML = '';
+  // "Play Next" option — insert into priority queue
+  var nextDiv = document.createElement('div'); nextDiv.className = 'ctx-item';
+  nextDiv.textContent = '⏭ 下一首播放';
+  nextDiv.style.cssText = 'color:var(--c-blue);font-weight:600;';
+  nextDiv.addEventListener('click', function(){
+    hideCtxMenu();
+    var track = source === 'netease' ? ncmTracks.find(function(t){return t.id == songId;}) : songs.find(function(t){return t.id == songId;});
+    if (!track) { toast('未找到歌曲'); return; }
+    nextQueue.push(track);
+    toast('⏭ 已加入插队队列');
+  });
+  ctxMenu.appendChild(nextDiv);
+  // Separator
+  var sep = document.createElement('div'); sep.style.cssText = 'height:1px;background:rgba(74,122,154,0.08);margin:4px 10px;';
+  ctxMenu.appendChild(sep);
   if (source === 'netease') {
     (ncmPlaylists.length ? ncmPlaylists : [{id:0,name:'暂无歌单'}]).forEach(function(p){
       var div = document.createElement('div'); div.className = 'ctx-item';
