@@ -1,7 +1,7 @@
 # fake_yuki 项目手册
 
 > 个人网站项目集合 — 此方 & Yuki ❄️  
-> 最后更新: 2026-07-25
+> 最后更新: 2026-08-01
 
 ---
 
@@ -144,6 +144,7 @@
 - 歌单：创建/重命名/删除、＋按钮统一添加/移除、排序
 - 安全：路径穿越防护 (`safe_file_path`)、数据库连接管理 (`closing()`)
 - PWA：manifest + service worker，手机可安装
+- 插队播放：`[＋]` 菜单"下一首播放"，`nextQueue` FIFO 队列，播完后自动回到原歌单继续
 
 ---
 
@@ -330,6 +331,7 @@ npm config set registry https://registry.npmmirror.com
 | **2026-07-23** | 书签站新分类修复；音乐站队列逻辑修复（手动播放锁定，auto-advance 跟随）；STYLE_GUIDE 组件规范完善；跨站播放方案讨论（备案后统一架构） |
 | **2026-07-24** | 🎉 域名备案通过，DNS 切至 ECS；三站统一部署（Caddy 反代 + Let's Encrypt HTTPS）；主站上线 https://fake-star.xyz；端口收敛（8080/8081 仅本地监听）；书签站 nav→bookmarks 路径修正 |
 | **2026-07-25** | 🔌 Chrome 扩展迷你播放器（MV3，popup+content+background）；NCM 封面 picUrl 修复；跨站弹窗简化（主站恢复普通链接）；清理旧迷你弹窗代码；OpenClaw 卸载+frp 隧道清空；全部文档+记忆文件同步 |
+| **2026-08-01** | 🐛 修复 M4A 误判 bug（`_is_real_audio_file` with 块提前关闭）+ NCM 扫码 cookie 误写 nickname；✨ 新增插队播放功能（`nextQueue` 优先级队列，`[＋]` 菜单"下一首播放"，播完后自动回到原歌单继续）；Cache-Control 改为 `no-store` |
 
 ### 下一步
 
