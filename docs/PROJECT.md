@@ -287,6 +287,8 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 
 **frp 面板**: `http://8.166.119.185:7500`
 
+**HTTPS 证书**: music/bookmarks 为 Let's Encrypt（Caddy 自动签，⚠️ ECS 直连 LE 已不稳定）；portfolio 为阿里云免费 DV 手动部署（至 2026-11-22 需手动换新），详见 `docs/SERVER.md`
+
 ### 机房软件
 
 | 软件 | 版本 | 路径 |

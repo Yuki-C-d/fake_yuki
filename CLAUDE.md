@@ -49,6 +49,7 @@ python -m http.server 3000
   - `frps` — frp 服务端
 - **外网**: `https://fake-star.xyz` / `https://music.fake-star.xyz` / `https://bookmarks.fake-star.xyz` / `https://portfolio.fake-star.xyz`
 - **作品集管理密码**: `systemctl edit fake-star-portfolio` → `PORTFOLIO_ADMIN_PASSWORD`（本地开发默认 `yuki-dev-2026`）
+- **HTTPS 证书**: portfolio 用阿里云免费 DV 手动部署（90 天，至 2026-11-22 需换新），ECS→Let's Encrypt 直连被墙时自动续期会失败
 
 ## 查看项目
 

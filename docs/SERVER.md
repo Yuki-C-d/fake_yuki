@@ -100,6 +100,18 @@ Caddy (:443) 反向代理
     └── portfolio.fake-star.xyz → 127.0.0.1:8082
 ```
 
+### HTTPS 证书
+
+| 站点 | 证书来源 | 有效期 | 续期 |
+|------|----------|--------|------|
+| fake-star.xyz / music / bookmarks | Let's Encrypt（Caddy 自动签发） | 90 天 | Caddy 自动续期（⚠️ ECS→Let's Encrypt 直连被墙时自动续期会失败，2026-08 实测超时） |
+| portfolio.fake-star.xyz | 阿里云免费 DV（DigiCert，手动部署） | 90 天（至 2026-11-22） | **手动**：阿里云控制台重新申请 → 下载 Nginx 格式 → 覆盖 `/etc/caddy/ssl/` → `systemctl reload caddy` |
+
+证书文件：ECS `/etc/caddy/ssl/portfolio.fake-star.xyz.{pem,key}`，本地备份 `D:\fake_yuki\server\ssl\`（不入 git）。
+
+> 💡 若 Let's Encrypt 续期失败，可将所有站点切到阿里云免费证书，或用 ZeroSSL（ECS 连通正常）做自动续期。
+```
+
 ### frps 配置（服务器端）
 
 - 配置文件: `/opt/frp/frps.toml`
