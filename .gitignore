@@ -43,6 +43,7 @@ server/frpc/frpc.log
 # 服务器凭证 & 密钥
 server/server.env
 server/keys/
+server/ssl/
 # 静态资源大图（部署时再传）
 apps/home/wallpaper.jpg
 apps/music/frontend/wallpaper.jpg
