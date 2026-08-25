@@ -219,7 +219,7 @@ ssh root@8.166.119.185 "systemctl restart fake-star-nav"
 
 ### 架构
 
-- **公开**：瀑布流作品墙（JS 按原图比例拼排，横竖版自然舒展；懒加载缩略图 + lightbox 原图/视频），无需登录
+- **公开**：瀑布流作品墙（JS 按原图比例拼排，高度 clamp 240~520px；宽高比 ≥1.3 的横版最多跨 3 列全宽横幅；懒加载缩略图 + lightbox 原图/视频），无需登录
 - **管理**：`/admin` 密码登录（HMAC cookie 7 天），上传队列带进度条，列表行 ⬆⬇ 排序按钮
 - **排序**：works.position 字段（新作品排最后），move API 与相邻作品交换 position
 - **存储**：UUID 文件名，media/ 原图 + thumb_ 缩略图；media/ 与 data/ 均不入 git
