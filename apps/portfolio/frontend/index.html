@@ -248,7 +248,9 @@ function render() {
       ? '<video src="' + esc(mediaUrl(w)) + '" preload="metadata" muted playsinline></video>'
         + '<div class="play-badge">▶</div>'
       : '<img src="' + esc(thumbUrl(w)) + '" loading="lazy" decoding="async" alt="' + esc(w.title) + '">';
-    html += '<div class="work-card" data-ratio="' + ratio + '" onclick="openLb(' + i + ')">'
+    // 横版图（宽高比 ≥ 1.3）跨两列展示，更醒目
+    var wide = parseFloat(ratio) >= 1.3;
+    html += '<div class="work-card' + (wide ? ' wide' : '') + '" data-ratio="' + ratio + '" onclick="openLb(' + i + ')">'
           + inner
           + '<div class="work-title">' + esc(w.title) + '</div></div>';
   });
@@ -270,14 +272,29 @@ function layoutGallery() {
   for (var i = 0; i < n; i++) {
     var card = cards[i];
     var ratio = parseFloat(card.getAttribute('data-ratio')) || 4 / 3;
+    var isWide = card.classList.contains('wide') && cols >= 2;
+    var w = isWide ? cardW * 2 + gap : cardW;
     // 高度按原比例，限制在 240~520px：横版不显得太小，超长竖版裁切展示
-    var h = Math.max(240, Math.min(520, cardW / ratio));
-    var c = colH.indexOf(Math.min.apply(null, colH));
-    card.style.width = cardW + 'px';
+    var h = Math.max(240, Math.min(520, w / ratio));
+    var c, top;
+    if (isWide) {
+      // 横版跨两列：找连续两列中「较高者最低」的位置，卡片贴齐放进去
+      c = 0;
+      for (var j = 1; j < cols - 1; j++) {
+        if (Math.max(colH[j], colH[j + 1]) < Math.max(colH[c], colH[c + 1])) c = j;
+      }
+      top = Math.max(colH[c], colH[c + 1]);
+      colH[c] = top + h + gap;
+      colH[c + 1] = colH[c];
+    } else {
+      c = colH.indexOf(Math.min.apply(null, colH));
+      top = colH[c];
+      colH[c] += h + gap;
+    }
+    card.style.width = w + 'px';
     card.style.height = h + 'px';
     card.style.left = c * (cardW + gap) + 'px';
-    card.style.top = colH[c] + 'px';
-    colH[c] += h + gap;
+    card.style.top = top + 'px';
   }
   g.style.height = (Math.max.apply(null, colH) - gap) + 'px';
 }
