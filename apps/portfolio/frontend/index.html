@@ -45,15 +45,13 @@ body::before {
 .hero p { color:var(--c-text-lt); margin-top:var(--sp); font-size:0.95rem; letter-spacing:0.05em; }
 .hero .star { color:var(--c-warm); }
 
-/* ── 作品墙 ── */
+/* ── 作品墙（JS 瀑布流：卡片绝对定位） ── */
 .gallery {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-  gap:var(--sp3);
+  position:relative;
   margin-top:var(--sp3);
 }
 .work-card {
-  position:relative;
+  position:absolute;
   border-radius:14px;
   overflow:hidden;
   cursor:pointer;
@@ -97,7 +95,6 @@ body::before {
 .work-card:hover .work-title { opacity:1; }
 
 .empty-state {
-  grid-column:1/-1;
   text-align:center; padding:var(--sp6) 0;
   color:var(--c-text-lt); letter-spacing:0.1em;
 }
@@ -170,7 +167,6 @@ body::before {
 
 @media (max-width:768px) {
   .hero h1 { font-size:1.6rem; }
-  .gallery { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:var(--sp2); }
   .lb-btn { width:36px; height:36px; }
   #lbPrev { left:var(--sp2); }
   #lbNext { right:var(--sp2); }
@@ -240,21 +236,57 @@ function render() {
   var g = document.getElementById('gallery');
   if (!works.length) {
     g.innerHTML = '<div class="empty-state"><span class="big">🎞️</span>这里还很安静<br>作品正在冲洗中</div>';
+    g.style.height = '';
     return;
   }
   var html = '';
   works.forEach(function(w, i) {
-    var ratio = (w.width && w.height) ? (w.width + ' / ' + w.height) : '4 / 3';
+    // 瀑布流比例：图片用原图比例，视频固定 16/9
+    var ratio = (w.media_type === 'image' && w.width && w.height)
+      ? (w.width / w.height).toFixed(4) : (16 / 9).toFixed(4);
     var inner = w.media_type === 'video'
       ? '<video src="' + esc(mediaUrl(w)) + '" preload="metadata" muted playsinline></video>'
         + '<div class="play-badge">▶</div>'
       : '<img src="' + esc(thumbUrl(w)) + '" loading="lazy" decoding="async" alt="' + esc(w.title) + '">';
-    html += '<div class="work-card" style="aspect-ratio:' + ratio + ';" onclick="openLb(' + i + ')">'
+    html += '<div class="work-card" data-ratio="' + ratio + '" onclick="openLb(' + i + ')">'
           + inner
           + '<div class="work-title">' + esc(w.title) + '</div></div>';
   });
   g.innerHTML = html;
+  layoutGallery();
 }
+
+/* ── 瀑布流布局：每张卡片放进当前最矮的列 ── */
+function layoutGallery() {
+  var g = document.getElementById('gallery');
+  var cards = g.getElementsByClassName('work-card');
+  var n = cards.length;
+  if (!n) return;
+  var gap = 24;
+  var avail = g.clientWidth;
+  var cols = Math.max(2, Math.min(5, Math.floor((avail + gap) / (250 + gap))));
+  var cardW = (avail - gap * (cols - 1)) / cols;
+  var colH = new Array(cols).fill(0);
+  for (var i = 0; i < n; i++) {
+    var card = cards[i];
+    var ratio = parseFloat(card.getAttribute('data-ratio')) || 4 / 3;
+    // 高度按原比例，限制在 240~520px：横版不显得太小，超长竖版裁切展示
+    var h = Math.max(240, Math.min(520, cardW / ratio));
+    var c = colH.indexOf(Math.min.apply(null, colH));
+    card.style.width = cardW + 'px';
+    card.style.height = h + 'px';
+    card.style.left = c * (cardW + gap) + 'px';
+    card.style.top = colH[c] + 'px';
+    colH[c] += h + gap;
+  }
+  g.style.height = (Math.max.apply(null, colH) - gap) + 'px';
+}
+
+var _resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(layoutGallery, 200);
+});
 
 /* ── Lightbox ── */
 var lbOverlay = document.getElementById('lbOverlay');

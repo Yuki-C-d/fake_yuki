@@ -329,7 +329,7 @@ function renderWorks(works) {
     return;
   }
   var html = '';
-  works.forEach(function(w) {
+  works.forEach(function(w, i) {
     var src = w.thumb_path ? '/media/' + w.thumb_path : (w.media_type === 'video' ? '' : '/media/' + w.file_path);
     var thumbHtml = src ? '<img class="thumb" src="' + esc(src) + '" alt="">'
                         : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#fff;">▶</div>';
@@ -341,11 +341,31 @@ function renderWorks(works) {
       + '<span class="badge' + (w.media_type === 'video' ? ' video' : '') + '">'
       + (w.media_type === 'video' ? '视频' : '照片') + '</span>'
       + '<div class="actions">'
+      + '<button class="btn btn-cancel btn-sm" title="上移" onclick="moveWork(' + w.id + ',\'up\')"'
+      + (i === 0 ? ' disabled' : '') + '>⬆</button>'
+      + '<button class="btn btn-cancel btn-sm" title="下移" onclick="moveWork(' + w.id + ',\'down\')"'
+      + (i === works.length - 1 ? ' disabled' : '') + '>⬇</button>'
       + '<button class="btn btn-cancel btn-sm" onclick="openEdit(' + w.id + ')">编辑</button>'
       + '<button class="btn btn-danger btn-sm" onclick="removeWork(' + w.id + ')">删除</button>'
       + '</div></div>';
   });
   list.innerHTML = html;
+}
+
+async function moveWork(id, direction) {
+  try {
+    var r = await fetch('/api/works/' + id + '/move', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({direction:direction})
+    });
+    if (r.status === 401) { showLogin(); return; }
+    if (!r.ok) {
+      var d = await r.json().catch(function(){ return {}; });
+      toast('⚠️ ' + (d.detail || '操作失败'));
+      return;
+    }
+    loadWorks();
+  } catch (e) { toast('❌ 操作失败'); }
 }
 
 async function removeWork(id) {

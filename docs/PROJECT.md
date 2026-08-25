@@ -213,14 +213,15 @@ ssh root@8.166.119.185 "systemctl restart fake-star-nav"
 |------|------|
 | 地址 | `https://portfolio.fake-star.xyz`（面试直接发这个链接） |
 | 后端 | FastAPI + SQLite (`apps/portfolio/data/portfolio.db`) |
-| 前端 | yuki_风格 作品墙 + lightbox + 密码管理页 (`/admin`) |
+| 前端 | yuki_风格 瀑布流作品墙 + lightbox + 密码管理页 (`/admin`) |
 | 部署 | ECS systemd `fake-star-portfolio` (:8082)，开机自启 |
-| 功能 | 照片(jpg/png/webp ≤20MB) + 短视频(mp4/webm ≤100MB)，拖拽上传、缩略图、编辑描述、删除 |
+| 功能 | 照片(jpg/png/webp ≤20MB) + 短视频(mp4/webm ≤100MB)，拖拽上传、缩略图、编辑描述、删除、上移/下移排序 |
 
 ### 架构
 
-- **公开**：作品墙（懒加载缩略图 + lightbox 原图/视频），无需登录
-- **管理**：`/admin` 密码登录（HMAC cookie 7 天），上传队列带进度条
+- **公开**：瀑布流作品墙（JS 按原图比例拼排，横竖版自然舒展；懒加载缩略图 + lightbox 原图/视频），无需登录
+- **管理**：`/admin` 密码登录（HMAC cookie 7 天），上传队列带进度条，列表行 ⬆⬇ 排序按钮
+- **排序**：works.position 字段（新作品排最后），move API 与相邻作品交换 position
 - **存储**：UUID 文件名，media/ 原图 + thumb_ 缩略图；media/ 与 data/ 均不入 git
 - **鉴权**：`PORTFOLIO_ADMIN_PASSWORD` 环境变量（ECS systemd 注入），密码错误 sleep 1s 防爆破
 - **安全**：目录穿越防护、扩展名白名单、分块流式上传超限清理
@@ -231,13 +232,14 @@ ssh root@8.166.119.185 "systemctl restart fake-star-nav"
 |------|------|------|------|
 | GET | `/` | — | 公开作品墙 |
 | GET | `/admin` | — | 管理页 |
-| GET | `/api/works` | — | 作品列表 |
+| GET | `/api/works` | — | 作品列表（position 排序） |
 | POST | `/api/admin/login` | — | 密码登录 → cookie |
 | POST | `/api/admin/logout` | cookie | 退出 |
 | GET | `/api/admin/check` | — | 登录状态 |
 | POST | `/api/works` | ✅ | multipart 上传（title+description+file） |
 | PUT | `/api/works/{id}` | ✅ | 编辑标题/描述 |
 | DELETE | `/api/works/{id}` | ✅ | 删除（连文件一起） |
+| POST | `/api/works/{id}/move` | ✅ | 排序：`{"direction":"up"|"down"}` 与相邻交换 |
 | GET | `/media/{path}` | — | 媒体文件（Range 支持视频拖动） |
 
 ---
@@ -375,7 +377,7 @@ npm config set registry https://registry.npmmirror.com
 | **2026-07-24** | 🎉 域名备案通过，DNS 切至 ECS；三站统一部署（Caddy 反代 + Let's Encrypt HTTPS）；主站上线 https://fake-star.xyz；端口收敛（8080/8081 仅本地监听）；书签站 nav→bookmarks 路径修正 |
 | **2026-07-25** | 🔌 Chrome 扩展迷你播放器（MV3，popup+content+background）；NCM 封面 picUrl 修复；跨站弹窗简化（主站恢复普通链接）；清理旧迷你弹窗代码；OpenClaw 卸载+frp 隧道清空；全部文档+记忆文件同步 |
 | **2026-08-01** | 🐛 修复 M4A 误判 bug（`_is_real_audio_file` with 块提前关闭）+ NCM 扫码 cookie 误写 nickname；✨ 新增插队播放功能（`nextQueue` 优先级队列，`[＋]` 菜单"下一首播放"，播完后自动回到原歌单继续）；Cache-Control 改为 `no-store` |
-| **2026-08-25** | 🖼️ 作品集站上线（面试用）：FastAPI+SQLite :8082，作品墙+lightbox（图片/视频，Range 拖动），密码管理页（HMAC cookie 鉴权、拖拽上传队列、Pillow 缩略图）；portfolio.fake-star.xyz 上线；主站摄影卡片→作品集入口 |
+| **2026-08-25** | 🖼️ 作品集站上线（面试用）：FastAPI+SQLite :8082，瀑布流作品墙+lightbox（图片/视频，Range 拖动），密码管理页（HMAC cookie 鉴权、拖拽上传队列、Pillow 缩略图、⬆⬇排序）；portfolio.fake-star.xyz 上线（阿里云免费 DV 证书，ECS→LE 被墙）；主站摄影卡片→作品集入口 |
 
 ### 下一步
 

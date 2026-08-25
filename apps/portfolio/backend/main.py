@@ -274,6 +274,23 @@ async def remove_work(work_id: int,
     return {"status": "ok"}
 
 
+class MoveIn(BaseModel):
+    direction: str
+
+
+@app.post("/api/works/{work_id}/move")
+async def move_work(work_id: int, body: MoveIn,
+                    _: bool = Depends(require_admin)):
+    if body.direction not in ("up", "down"):
+        raise HTTPException(400, "direction 必须是 up 或 down")
+    result = models.move_work(work_id, body.direction)
+    if result is None:
+        raise HTTPException(404, "作品不存在")
+    if result is False:
+        raise HTTPException(400, "已经在最前面/最后面了")
+    return {"status": "ok"}
+
+
 # ═══════════════════════════════════════════════
 #  Media serving
 # ═══════════════════════════════════════════════
