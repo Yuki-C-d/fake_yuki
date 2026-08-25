@@ -272,20 +272,22 @@ function layoutGallery() {
   for (var i = 0; i < n; i++) {
     var card = cards[i];
     var ratio = parseFloat(card.getAttribute('data-ratio')) || 4 / 3;
-    var isWide = card.classList.contains('wide') && cols >= 2;
-    var w = isWide ? cardW * 2 + gap : cardW;
+    // 横版最多跨 3 列（3 列布局下即全宽横幅）
+    var k = (card.classList.contains('wide') && cols >= 2) ? Math.min(cols, 3) : 1;
+    var w = k > 1 ? cardW * k + gap * (k - 1) : cardW;
     // 高度按原比例，限制在 240~520px：横版不显得太小，超长竖版裁切展示
     var h = Math.max(240, Math.min(520, w / ratio));
     var c, top;
-    if (isWide) {
-      // 横版跨两列：找连续两列中「较高者最低」的位置，卡片贴齐放进去
+    if (k > 1) {
+      // 找连续 k 列中「最高者最低」的起始列，卡片贴齐放进去
       c = 0;
-      for (var j = 1; j < cols - 1; j++) {
-        if (Math.max(colH[j], colH[j + 1]) < Math.max(colH[c], colH[c + 1])) c = j;
+      var minTop = Infinity;
+      for (var j = 0; j + k <= cols; j++) {
+        var jTop = Math.max.apply(null, colH.slice(j, j + k));
+        if (jTop < minTop) { minTop = jTop; c = j; }
       }
-      top = Math.max(colH[c], colH[c + 1]);
-      colH[c] = top + h + gap;
-      colH[c + 1] = colH[c];
+      top = minTop;
+      for (var m = 0; m < k; m++) colH[c + m] = top + h + gap;
     } else {
       c = colH.indexOf(Math.min.apply(null, colH));
       top = colH[c];
