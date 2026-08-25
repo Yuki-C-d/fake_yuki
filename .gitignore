@@ -5,6 +5,10 @@ __pycache__/
 
 # 数据库
 apps/music/data/
+apps/portfolio/data/
+
+# 作品集媒体文件（个人照片/视频）
+apps/portfolio/media/
 
 # IDE
 .vscode/

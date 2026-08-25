@@ -1,0 +1,14 @@
+[Unit]
+Description=fake-star portfolio service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/fake_yuki
+Environment=PORTFOLIO_ADMIN_PASSWORD=CHANGE_ME
+ExecStart=/usr/bin/python3 -m uvicorn apps.portfolio.backend.main:app --host 127.0.0.1 --port 8082
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

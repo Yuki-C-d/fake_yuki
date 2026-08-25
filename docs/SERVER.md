@@ -1,6 +1,6 @@
 # ☁️ fake_yuki 服务器文档
 
-> 最后更新: 2026-07-25
+> 最后更新: 2026-08-25
 
 ---
 
@@ -51,6 +51,7 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | 7500 | TCP | frp 管理面板 | 浏览器查看隧道状态 |
 | 8080 | TCP | (内部) | 音乐站 127.0.0.1（Caddy 反代） |
 | 8081 | TCP | (内部) | 书签站 127.0.0.1（Caddy 反代） |
+| 8082 | TCP | (内部) | 作品集 127.0.0.1（Caddy 反代） |
 | 3000 | TCP | (内部) | NCM API 127.0.0.1 |
 
 ---
@@ -64,6 +65,7 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 | **npm** | 11.13.0 | 随 Node.js | — |
 | **caddy** | v2.11.4 | apt 安装 | `/usr/bin/caddy` |
 | **Python** | 3.10.12 | 系统自带 | `/usr/bin/python3` |
+| **Pillow** | 9.0.1 | apt (`python3-pil`) | 作品集缩略图 |
 
 ### npm 源
 
@@ -77,6 +79,7 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 |------|------|----------|----------|
 | **fake-yuki-music** | ✅ active | FastAPI 音乐站 (127.0.0.1:8080) | ✅ |
 | **fake-star-nav** | ✅ active | FastAPI 书签站 (127.0.0.1:8081) | ✅ |
+| **fake-star-portfolio** | ✅ active | FastAPI 作品集 (127.0.0.1:8082) | ✅ |
 | **ncmapi** | ✅ active | NeteaseCloudMusicApi (127.0.0.1:3000) | ✅ |
 | **caddy** | ✅ active | 反向代理 + HTTPS (80/443) | ✅ |
 | **frps** | ✅ active | frp 服务端 | ✅ |
@@ -91,9 +94,10 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
     │
     ▼
 Caddy (:443) 反向代理
-    ├── fake-star.xyz        → /opt/fake_yuki/apps/home/
+    ├── fake-star.xyz          → /opt/fake_yuki/apps/home/
     ├── music.fake-star.xyz    → 127.0.0.1:8080
-    └── bookmarks.fake-star.xyz → 127.0.0.1:8081
+    ├── bookmarks.fake-star.xyz → 127.0.0.1:8081
+    └── portfolio.fake-star.xyz → 127.0.0.1:8082
 ```
 
 ### frps 配置（服务器端）
@@ -196,4 +200,4 @@ rm /tmp/node.tar.xz
 
 ---
 
-*本文档涵盖截至 2026-07-26 的所有服务器配置。*
+*本文档涵盖截至 2026-08-25 的所有服务器配置。*

@@ -28,12 +28,24 @@ scp -i "D:/fake_yuki/server/keys/id_ed25519" D:/fake_yuki/apps/bookmarks/fronten
 scp -i "D:/fake_yuki/server/keys/id_ed25519" D:/fake_yuki/apps/bookmarks/backend/main.py root@8.166.119.185:/opt/fake_yuki/apps/bookmarks/backend/main.py
 ```
 
+### Portfolio
+
+```bash
+scp -i "D:/fake_yuki/server/keys/id_ed25519" D:/fake_yuki/apps/portfolio/frontend/index.html root@8.166.119.185:/opt/fake_yuki/apps/portfolio/frontend/index.html
+scp -i "D:/fake_yuki/server/keys/id_ed25519" D:/fake_yuki/apps/portfolio/frontend/admin.html root@8.166.119.185:/opt/fake_yuki/apps/portfolio/frontend/admin.html
+scp -i "D:/fake_yuki/server/keys/id_ed25519" D:/fake_yuki/apps/portfolio/backend/main.py root@8.166.119.185:/opt/fake_yuki/apps/portfolio/backend/main.py
+ssh -i "D:/fake_yuki/server/keys/id_ed25519" root@8.166.119.185 "systemctl restart fake-star-portfolio"
+```
+
+注意：media/（媒体文件）和 data/（SQLite）不在 git 里，独立备份/恢复；改管理密码用 `systemctl edit fake-star-portfolio` 改 `PORTFOLIO_ADMIN_PASSWORD`。
+
 ### Services
 
 | Service | Restart |
 |---------|---------|
 | Music | `systemctl restart fake-yuki-music` |
 | Nav | `systemctl restart fake-star-nav` |
+| Portfolio | `systemctl restart fake-star-portfolio` |
 | Caddy | `systemctl reload caddy` |
 
 ### Verify
@@ -42,4 +54,5 @@ scp -i "D:/fake_yuki/server/keys/id_ed25519" D:/fake_yuki/apps/bookmarks/backend
 curl -s -w '%{http_code}' https://fake-star.xyz/ -o /dev/null && echo " home"
 curl -s -w '%{http_code}' https://music.fake-star.xyz/api/songs -o /dev/null && echo " music"
 curl -s -w '%{http_code}' https://bookmarks.fake-star.xyz/api/bookmarks -o /dev/null && echo " bookmarks"
+curl -s -w '%{http_code}' https://portfolio.fake-star.xyz/api/works -o /dev/null && echo " portfolio"
 ```
