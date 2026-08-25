@@ -392,6 +392,7 @@ npm config set registry https://registry.npmmirror.com
 1. **frpc.exe 被 Defender 误杀** — 已将 `D:\fake_yuki` 加入排除项
 2. **音乐文件不入 Git** — `music-files/` 在 `.gitignore` 中
 2b. **作品集媒体/数据不入 Git** — `apps/portfolio/media/` 和 `apps/portfolio/data/` 在 `.gitignore` 中
+2c. **证书私钥不入 Git** — `server/ssl/` 在 `.gitignore` 中（2026-08-25 曾误提交，已清理历史；仓库是 public，所有敏感文件先查 .gitignore）
 3. **服务器凭证不入 Git** — `server/server.env` 和 `server/keys/` 在 `.gitignore` 中
 4. **导航站独立仓库** — `apps/bookmarks/` 有自己的 Git 仓库，不跟主仓库混合
 5. **换设备恢复** — `git clone git@github.com:Yuki-C-d/fake_yuki.git` + 拷入 music-files/ + tools/*.exe + server/keys/
