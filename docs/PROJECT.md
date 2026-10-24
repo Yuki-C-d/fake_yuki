@@ -386,6 +386,7 @@ npm config set registry https://registry.npmmirror.com
 |--------|------|
 | ⭐⭐ | 随手记后端（碎碎念 + 图片上传） |
 | ⭐⭐ | 移动端适配 |
+| ⭐ | portfolio 证书切回 LE 自动续期（2027-01 换新时评估；2026-10 实测 LE 线路已恢复，music/bookmarks 自动续期成功） |
 | 💤 | 用户认证 / Agent 接入 |
 
 ---

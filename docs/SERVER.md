@@ -110,6 +110,7 @@ Caddy (:443) 反向代理
 证书文件：ECS `/etc/caddy/ssl/portfolio.fake-star.xyz.{pem,key}`，本地备份 `D:\fake_yuki\server\ssl\`（不入 git）。
 
 > 💡 若 Let's Encrypt 续期失败，可将所有站点切到阿里云免费证书，或用 ZeroSSL（ECS 连通正常）做自动续期。
+> ✅ 2026-10 实测 ECS→LE 线路已恢复（music/bookmarks 自动续期成功，已续至 2026-12-21）；下次 portfolio 换新（2027-01 中旬）优先考虑切回 LE 自动续期，摆脱手动证书。
 ```
 
 ### frps 配置（服务器端）
