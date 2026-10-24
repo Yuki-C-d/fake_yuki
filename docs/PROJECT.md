@@ -289,7 +289,7 @@ ssh -i D:\fake_yuki\server\keys\id_ed25519 root@8.166.119.185
 
 **frp 面板**: `http://8.166.119.185:7500`
 
-**HTTPS 证书**: music/bookmarks 为 Let's Encrypt（Caddy 自动签，⚠️ ECS 直连 LE 已不稳定）；portfolio 为阿里云免费 DV 手动部署（至 2026-11-22 需手动换新），详见 `docs/SERVER.md`
+**HTTPS 证书**: music/bookmarks 为 Let's Encrypt（Caddy 自动签，⚠️ ECS 直连 LE 已不稳定）；portfolio 为阿里云免费 DV 手动部署（199 天，至 2027-01-21 需手动换新），详见 `docs/SERVER.md`
 
 ### 机房软件
 
@@ -378,6 +378,7 @@ npm config set registry https://registry.npmmirror.com
 | **2026-07-25** | 🔌 Chrome 扩展迷你播放器（MV3，popup+content+background）；NCM 封面 picUrl 修复；跨站弹窗简化（主站恢复普通链接）；清理旧迷你弹窗代码；OpenClaw 卸载+frp 隧道清空；全部文档+记忆文件同步 |
 | **2026-08-01** | 🐛 修复 M4A 误判 bug（`_is_real_audio_file` with 块提前关闭）+ NCM 扫码 cookie 误写 nickname；✨ 新增插队播放功能（`nextQueue` 优先级队列，`[＋]` 菜单"下一首播放"，播完后自动回到原歌单继续）；Cache-Control 改为 `no-store` |
 | **2026-08-25** | 🖼️ 作品集站上线（面试用）：FastAPI+SQLite :8082，瀑布流作品墙+lightbox（图片/视频，Range 拖动），密码管理页（HMAC cookie 鉴权、拖拽上传队列、Pillow 缩略图、⬆⬇排序）；portfolio.fake-star.xyz 上线（阿里云免费 DV 证书，ECS→LE 被墙）；主站摄影卡片→作品集入口 |
+| **2026-10-24** | 🔒 portfolio 阿里云证书换新（CA/B 新规 199 天，至 2027-01-21），域名列表与旧证书一致（含 www，www 无 DNS 记录未使用）；music/bookmarks 的 LE 证书自动续期正常（已续至 2026-12-21） |
 
 ### 下一步
 
